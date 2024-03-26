@@ -2,7 +2,7 @@
 .stack 100h
 
 .data
-snake_s dw 04h
+snake_s dw 01h
 snake_x dw 0Ah
 snake_y dw 0Ah
 ; or head_pos dw 0A0Ah (x coord on higher byte)
@@ -17,6 +17,9 @@ play_s equ $-play
 exit db "[2] Exit"
 exit_s equ $-exit
 
+registers db "AX:     BX:     CX:     DX:"
+reg_s equ $-registers
+
 time_now db 0
 
 key_pressed db 0
@@ -27,14 +30,14 @@ key_pressed db 0
 main: 
     mov ax, @data
     mov es,ax
-    mov ah, 00h
-    mov al, 13h
+    mov ax, 0013h
     int 10h
     mov ah, 0Bh
-    mov bh, 00h
-    mov bl, 00h
+    xor bx, bx 
     int 10h
-
+    mov ax, 3023h
+    push ax
+    call reg
     ;call draw_snake
 
     mov ah, 4ch
@@ -52,21 +55,53 @@ main:
     draw_x:
         mov ah, 0ch
         mov al, 0fh
-        mov bh, 00h
+        xor bx, bx
+        push ax
+        push bx
+        call reg
+        pop bx
+        pop ax
         int 10h
         inc cx 
         mov ax, cx
         sub ax, snake_x 
         cmp ax, snake_s 
-        jng draw_x
+        jle draw_x
+        ret
         mov cx, snake_x
         inc dx
         mov ax, dx 
         sub ax, snake_y 
         cmp ax, snake_s 
-        jng draw_x
+        jle draw_x
     ret
 
+reg:
+ ;   mov ax, 1300h
+ ;   mov bx, 000Fh
+ ;   mov dx, 0
+ ;   mov cx, reg_s
+ ;   mov bp, offset registers 
+ ;   int 10h
+    mov bx, 0
+
+    again:
+        mov ah, 09h 
+        mov cx, 1
+        pop dx    ; get ax register
+        push dx   ; store ax register
+        push dx
+        and dx, 0Fh ; get lowest byte
+        cmp dx, 9   ;convert to ascii
+        jle conv 
+        add dx, 7
+        conv:
+            add dx, '0'
+        mov al, dl
+        int 10h  ; print
+
+    
+    ret
 ;game_screen:
   ;  mov ax, 1300h ; interrupt for write string
   ;  mov bx, 000Fh ; set page number and color of string
@@ -125,16 +160,18 @@ main:
         ;int 10h
     ;return:
         ;ret 
-end 
 
-;timer:
-    ;mov ah, 2ch ; get system time
-    ;int 21h
-    ;cmp dh, time_now
-    ;je timer 
-    ;mov time_now, dh
+timer:
+    mov ah, 2ch ; get system time
+    int 21h
+    cmp dh, time_now
+    je timer 
+    mov time_now, dh
+    call reg
+    ret
     ;* do actions here *
     ;* ex.
     ; mov ax, snake_velocity 
     ; add snake_x, ah
     ; add snake_y, al
+end
