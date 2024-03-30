@@ -668,3 +668,49 @@ writestringat endp
 main endp
           
 end main
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ mov di, offset body
+        xor cx, cx 
+        xor dx, dx 
+
+        draw_body:
+            mov bx, [ds:di]
+            mov cl, bh
+            mov dl, bl
+          
+            mov ah, 0ch
+            mov al, 0fh
+            mov bh, 00h
+            int 10h   
+            
+            inc cx
+            mov ax, cx
+            sub al, bh
+            cmp ax, head_size
+            jle draw_body   
+
+            mov cl, bh
+            inc dx 
+            mov ax, dx
+            sub al, bl 
+            cmp ax, head_size 
+            jle draw_body
+
+            add di, 2
+            cmp di, 10
+            jne draw_body
