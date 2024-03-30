@@ -1,17 +1,26 @@
+; NOTES: -probably very inefficient idk
+;        - atm, only works on TASM
+;        - press esc key to exit game
+;        - w, a, s, d to move
+; TODOs:
+;       - try to fix flickering graphics which gets more noticeable as snake gets larger
+;       - check for collision with self
+;       - score resets to 00 if greater than 15
+;       - holding the opposite key of the present direction stops the snake
 .model small
-.stack 100h
+.stack 10h
 .data
-    head_x dw 0Ah
-    head_y dw 0Ah 
-    head_size dw 06h 
-    body_x dw 25 dup (?)
-    body_y dw 25 dup (?)
-    body_size dw 0
+    square_size dw 06h      ; change size of snake/fruit here
+    body_x dw 50 dup (?)    ; change max length of snake here
+    body_y dw 50 dup (?)    ; change max length of snake here
+    snake_length dw 0
     key_pressed db 'd'
     prev_key db ?
     time_now db 00h
-    food_x dw 05h
-    food_y dw 04h
+    food_x dw 10
+    food_y dw 10
+    temp_x dw ?             
+    temp_y dw ?             
     
     strScore db 'Score:'
     strScore_s equ $-strScore 
@@ -38,8 +47,10 @@
             call move
             call cls
             jmp game_loop
-        
-        ret    
+
+        ; should never reach this
+        mov ah, 4ch
+        int 21h
     write_score:
         mov ax, 1300h ; interrupt for write string
         mov bx, 000Fh ; set page number and color of string
@@ -50,24 +61,24 @@
         mov bp, offset strScore ; string in es:bp 
         int 10h
 
-        mov ah, 02h         ; place cursor beside score string
+        mov ah, 02h         ; place cursor after strScore
         mov dl, 7
         int 10h
         
-        mov ax, body_size   ; convert score to decimal
+        mov ax, snake_length   ; convert score to decimal
         aaa                 ; ah = tenths  |  al = ones
         mov dx, ax          
         add dh, '0'         ; convert to ascii
         add dl, '0'
-        push dx
+        push dx             
 
-        mov ah, 09h         
+        mov ah, 09h         ; interrupt for writing char
         mov al, dh
         mov bx, 000Fh
         mov cx, 1
         int 10h             ; write tenths place
 
-        mov ah, 02h         ; place cursor beside tenths place
+        mov ah, 02h         ; place cursor after tenths place
         mov dh, 0           
         mov dl, 8
         int 10h
@@ -79,46 +90,23 @@
         ret
 
     cls: ; clears the screen
-        mov ah, 07h          ; Scroll up function
-        mov al, 0            ; Number of lines to scroll
+        mov ah, 07h          ; scroll down function
+        mov al, 0            ; number of lines to scroll
         mov cx, 0
         mov dx, 9090
-        mov bh, 00h          ; Clear entire screen
+        mov bh, 00h          ; clear entire screen
         int 10h
         ret
+
     draw:
-        mov cx, head_x
-        mov dx, head_y
-        
-        ;draw_head:
-        ;    mov ax, 0c0fh
-        ;    mov bh, 00h
-        ;    int 10h             ; draw pixel
-
-        ;    inc cx              
-        ;    mov ax, cx
-        ;    sub ax, head_x 
-        ;    cmp ax, head_size
-        ;    jle draw_head       ; check x axis
-
-        ;    mov cx, head_x
-        ;    inc dx 
-
-        ;    mov ax, dx
-        ;    sub ax, head_y
-        ;    cmp ax, head_size 
-        ;    jle draw_head       ; check y axis
-        
         mov si, offset body_x
         mov di, offset body_y 
         mov bp, 0
         
-        ;cmp body_size, 0  ; only draw body if body_size > 0
-        ;je food
+        body:
+            mov cx, [ds:si+bp] ; get snake head x coord 
+            mov dx, [ds:di+bp] ; get snake head y coord
 
-        body: 
-            mov cx, [ds:si+bp]
-            mov dx, [ds:di+bp]
         draw_body:
             mov ax, 0c0fh
             mov bh, 00h
@@ -127,27 +115,27 @@
             inc cx              
             mov ax, cx
             sub ax, [ds:si+bp] 
-            cmp ax, head_size
+            cmp ax, square_size
             jle draw_body       ; check x axis
 
             mov cx, [ds:si+bp]
             inc dx 
 
-            mov ax, dx
+            mov ax, dx          
             sub ax, [ds:di+bp]
-            cmp ax, head_size 
-            jle draw_body    
-
-            add bp, 2
-            mov ax, body_size
+            cmp ax, square_size 
+            jle draw_body       ; check y axis
+            
+            ; the next remaining lines are for checking if we have iterated through the entirety of the snake
+            add bp, 2          
+            mov ax, snake_length
             mov bx, 2
             mul bx 
             cmp bp, ax
             jle body
 
-        food:
-            mov cx, food_x
-            mov dx, food_y    
+        mov cx, food_x
+        mov dx, food_y    
         draw_food:
             mov ax, 0c04h
             mov bh, 00h
@@ -156,14 +144,14 @@
             inc cx 
             mov ax, cx
             sub ax, food_x 
-            cmp ax, head_size 
+            cmp ax, square_size 
             jle draw_food 
             
             mov cx, food_x
             inc dx 
             mov ax, dx 
             sub ax, food_y
-            cmp ax, head_size 
+            cmp ax, square_size 
             jle draw_food 
         
         ret 
@@ -172,12 +160,12 @@
         mov ah, 01h ; get user input
         int 16h
     
-        jz stop
+        jz back
 
         mov ah, 00h
         int 16h
         
-        cmp al, '2' ; check if escape key
+        cmp al, 27 ; check if escape key
         jne update ; update key_pressed if not 2 
         mov ah, 4ch
         int 21h
@@ -187,9 +175,10 @@
             mov prev_key, ah
             mov key_pressed, al
            
-    stop: ret 
+    back: ret 
 
-    rng:
+    ; thank you stackoverflow, very cool https://stackoverflow.com/questions/40698309/8086-random-number-generator-not-just-using-the-system-time
+    rng:       
         mov ax, 25173
         mul word ptr food_x
         add ax, 13849
@@ -205,30 +194,39 @@
         mov ah, 2ch ; get system time
         int 21h
         cmp dl, time_now
-        je move
+        je move     ; keep checking until we have a different time
         mov time_now, dl
 
         mov si, offset body_x 
         mov di, offset body_y
 
-        ;mov cx, head_x
-        ;mov dx, head_y
-        ;mov [ds:si], cx
-        ;mov [ds:di], dx
         mov bp, 2
-        body_move: ; while moving, transfer the value of the head to the body
-            mov ax, [ds:si+bp-2]
-            mov [ds:si+bp], ax             ;0 
-            mov ax, [ds:di+bp-2]
-            mov [ds:di+bp], ax
-            add bp, 2
-            mov ax, body_size
+        mov cx, word ptr [ds:si]
+        mov temp_x, cx              ; temporarily store the value of snake head x coord
+        mov cx, word ptr [ds:di]    
+        mov temp_y, cx              ; temporarily store the value of snake head y coord
+        
+        body_move: 
+            mov cx, temp_x                  ; get previous x coord   
+            mov dx, word ptr [ds:si+bp]
+            mov word ptr [ds:si+bp], cx
+            mov temp_x, dx                  ; store current x coord value for next iteration
+            
+            mov cx, temp_y                  ; get previous y coord 
+            mov dx, word ptr [ds:di+bp]
+            mov word ptr [ds:di+bp], cx
+            mov temp_y, dx                  ; store current y coord value for next iteration
+            
+            add bp, 2                       ; get next coordinates from x and y arrays
+            
+            ; next remaining lines are for checking if we have iterated through the entirety of the snake
+            mov ax, snake_length           
             mov bx, 2
             mul bx
             cmp bp, ax
-            jl body_move
+            jle body_move
         
-        mov ax, head_size
+        mov ax, square_size
         cmp key_pressed, 'w'
         je move_up 
         cmp key_pressed, 'a' 
@@ -239,7 +237,7 @@
         je move_right
         jmp ignore
         move_up:
-            cmp prev_key, 's'
+            cmp prev_key, 's'       ; if the previous key is the opposite direction, do nothing
             je ignore
             sub word ptr [ds:di], ax 
             jmp collision 
@@ -262,7 +260,7 @@
             mov ah, prev_key
             mov key_pressed, ah
         
-        collision:      ; checks for collision with fruit
+        collision:      ; checks for collision with fruit   ! TODO: collision with self !
             mov cx, word ptr [ds:si]
             mov dx, word ptr [ds:di]
             mov ah, 0dh
@@ -271,11 +269,10 @@
 
             cmp al, 04h
             jne return 
-            mov ax, body_size
+            mov ax, snake_length
             inc ax 
-            mov body_size, ax
+            mov snake_length, ax
             call rng 
             
         return: ret
-
 end
