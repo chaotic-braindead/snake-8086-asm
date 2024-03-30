@@ -7,6 +7,7 @@
 ;       - check for collision with self
 ;       - score resets to 00 if greater than 15
 ;       - holding the opposite key of the present direction stops the snake
+;       - "rng" is not really random
 .model small
 .stack 10h
 .data
