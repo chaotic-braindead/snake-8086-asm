@@ -260,7 +260,7 @@
             mov ah, prev_key
             mov key_pressed, ah
         
-        collision:      ; checks for collision with fruit   ! TODO: collision with self !
+        collision:      ; checks for collision with food   ! TODO: collision with self !
             mov cx, word ptr [ds:si]
             mov dx, word ptr [ds:di]
             mov ah, 0dh
