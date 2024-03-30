@@ -3,7 +3,7 @@
 ;        - press esc key to exit game
 ;        - w, a, s, d to move
 ; TODOs:
-;       - try to fix flickering graphics which gets more noticeable as snake gets larger
+;       - try to fix flickering graphics which gets more noticeable as snake gets longer
 ;       - check for collision with self
 ;       - score resets to 00 if greater than 15
 ;       - holding the opposite key of the present direction stops the snake
@@ -36,8 +36,8 @@
         mov ah, 0Bh
         mov bx, 0000h
         int 10h
-        mov si, offset body_x
-        mov di, offset body_y 
+        lea si, body_x
+        lea di, body_y 
         mov word ptr [ds:si], 0Ah
         mov word ptr [ds:di], 0Ah
         call rng 
@@ -59,7 +59,7 @@
         mov dh, 0 ; row
         mov dl, 0 ; col
         mov cx, strScore_s ; size of string
-        mov bp, offset strScore ; string in es:bp 
+        lea bp, strScore ; string in es:bp 
         int 10h
 
         mov ah, 02h         ; place cursor after strScore
@@ -100,8 +100,8 @@
         ret
 
     draw:
-        mov si, offset body_x
-        mov di, offset body_y 
+        lea si, body_x
+        lea di, body_y 
         mov bp, 0
         
         body:
@@ -198,8 +198,8 @@
         je move     ; keep checking until we have a different time
         mov time_now, dl
 
-        mov si, offset body_x 
-        mov di, offset body_y
+        lea si, body_x 
+        lea di, body_y
 
         mov bp, 2
         mov cx, word ptr [ds:si]
