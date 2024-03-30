@@ -6,7 +6,7 @@
     head_y dw 0Ah 
     head_size dw 04h 
     
-    time_now 
+    time_now db 00h
 
 .code
     mov ax, @data
@@ -19,7 +19,10 @@
         mov bx, 0000h
         int 10h
         
-        call draw
+        game_loop:
+            call draw
+            call timer
+            jmp game_loop
         
         ret
         ;mov ah, 4ch
@@ -49,5 +52,20 @@
             cmp ax, head_size 
             jle draw_head       ; check y axis
         ret 
+    
+    timer:
+        mov ah, 2ch ; get system time
+        int 21h
+        cmp dh, time_now
+        je timer 
+        mov ax, head_size
+        add head_x, ax
+        mov time_now, dh
+        ret
+    ;* do actions here *
+    ;* ex.
+    ; mov ax, snake_velocity 
+    ; add snake_x, ah
+    ; add snake_y, al
     
 end
