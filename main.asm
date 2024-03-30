@@ -15,10 +15,12 @@
     food_y dw 04h
     
     strScore dw 'Score:'
+    strScore_s equ $-strScore 
 
 .code
     mov ax, @data
     mov ds, ax 
+    mov es, ax 
     main:
         mov ax, 0013h
         int 10h
@@ -35,6 +37,18 @@
             jmp game_loop
         
         ret    
+    write_score:
+        mov ax, 1300h ; interrupt for write string
+        mov bx, 000Fh ; set page number and color of string
+   
+        mov dh, 02 ; row
+        mov dl, 22 ; col
+        sub dl, strScore_s ; offset 
+        mov cx, strScore_s ; size of string
+        mov bp, offset game ; string in es:bp 
+        int 10h
+
+        ret
     cls: ; clears the screen
         mov ah, 07h          ; Scroll up function
         mov al, 0            ; Number of lines to scroll
