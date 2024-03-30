@@ -10,7 +10,7 @@
 .model small
 .stack 10h
 .data
-    square_size dw 06h      ; change size of snake/fruit here
+    square_size dw 06h      ; change size of snake/food here
     body_x dw 50 dup (?)    ; change max length of snake here
     body_y dw 50 dup (?)    ; change max length of snake here
     snake_length dw 0
