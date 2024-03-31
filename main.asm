@@ -1,12 +1,12 @@
-; NOTES: -probably very inefficient idk
+; NOTES: - probably very inefficient idk
 ;        - works on both TASM and MASM
 ;        - press esc key to exit game
 ;        - w, a, s, d to move
 ; TODOs:
-;       - try to fix flickering graphics which gets more noticeable as snake gets longer (a temporary fix is to increase cpu clock cycles on dosbox to around 100,000)
+;       - try to fix flickering graphics which gets more noticeable as snake gets longer (a temporary fix is to set cpu cycles to max on dosbox)
 ;       - check for collision with self
 ;       - score resets to 00 if greater than 15
-;       - "rng" is not really random
+;       - food "rng" is not really random; sometimes food spawns on on snake's body 
 .model small
 .stack 10h
 .data
@@ -126,9 +126,9 @@
             cmp ax, square_size 
             jle draw_body       ; check y axis
             
-            ; the next remaining lines are for checking if we have iterated through the entirety of the snake
-            add si, 2
+            add si, 2   ; get next x and y coords
             add di, 2
+            ; the next remaining lines are for checking if we have iterated through the entirety of the snake
             add bp, 2          
             mov ax, snake_length
             mov bx, 2
@@ -209,7 +209,7 @@
         mov temp_y, cx              ; temporarily store the value of snake head y coord
         
         body_move: 
-            add si, 2
+            add si, 2                       ; get next x and y coords
             add di, 2
             mov cx, temp_x                  ; get previous x coord   
             mov dx, word ptr [si]
@@ -222,8 +222,7 @@
             mov temp_y, dx                  ; store current y coord value for next iteration
             
            
-            add bp, 2                       ; get next coordinates from x and y arrays
-            
+            add bp, 2                      
             ; next remaining lines are for checking if we have iterated through the entirety of the snake
             mov ax, snake_length           
             mov bx, 2
