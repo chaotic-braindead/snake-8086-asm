@@ -6,7 +6,6 @@
 ;       - try to fix flickering graphics which gets more noticeable as snake gets longer
 ;       - check for collision with self
 ;       - score resets to 00 if greater than 15
-;       - holding the opposite key of the present direction stops the snake
 ;       - "rng" is not really random
 .model small
 .stack 10h
@@ -270,7 +269,7 @@
             mov bh, 00h
             int 10h 
        ; insert self collision here
-       
+
        ; food collision
             cmp al, 04h
             jne return 
