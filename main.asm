@@ -104,8 +104,8 @@
         mov bp, 0
         
         body:
-            mov cx, [ds:si+bp] ; get snake head x coord 
-            mov dx, [ds:di+bp] ; get snake head y coord
+            mov cx, word ptr [ds:si+bp] ; get snake head x coord 
+            mov dx, word ptr [ds:di+bp] ; get snake head y coord
 
         draw_body:
             mov ax, 0c0fh
@@ -114,15 +114,15 @@
 
             inc cx              
             mov ax, cx
-            sub ax, [ds:si+bp] 
+            sub ax, word ptr [ds:si+bp] 
             cmp ax, square_size
             jle draw_body       ; check x axis
 
-            mov cx, [ds:si+bp]
+            mov cx, word ptr [ds:si+bp]
             inc dx 
 
             mov ax, dx          
-            sub ax, [ds:di+bp]
+            sub ax, word ptr [ds:di+bp]
             cmp ax, square_size 
             jle draw_body       ; check y axis
             
