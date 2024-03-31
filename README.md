@@ -1,9 +1,11 @@
 <h1>Snek</h1>
+<p>Snake game written in 8086 assembly</p>
 <p align="center">
   <img style="width:500px" src="https://github.com/chaotic-braindead/snake-8086-asm/blob/main/demo.gif?raw=true" alt="snek demo">
 </p>
 <ul>
   <h2>NOTES</h2>
+  <li>DOSBOX only</li>
   <li>probably very inefficient idk</li>
   <li>fix flickering screen is to set cpu cycles to max on dosbox options</li>
   <li>works on both TASM and MASM</li>
