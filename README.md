@@ -16,7 +16,6 @@
   <h2>TODOs/bugs</h2>
   <li>flickering graphics on lower cpu cycles which becomes more noticeable as snake gets longer </li>
   <li>check for collision with self</li>
-  <li>score resets to 00 if greater than 15</li>
   <li>food collision is not detected in seemingly random instances</li>
   <li>food "rng" is not really random; sometimes food spawns on on snake's body </li>
 </ul>

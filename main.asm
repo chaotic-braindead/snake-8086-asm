@@ -5,19 +5,18 @@
 ; TODOs:
 ;       - try to fix flickering graphics which gets more noticeable as snake gets longer (a temporary fix is to set cpu cycles to max on dosbox)
 ;       - check for collision with self
-;       - score resets to 00 if greater than 15
 ;       - food "rng" is not really random; sometimes food spawns on on snake's body 
 .model small
 .stack 10h
 .data
     square_size dw 8h      ; change size of snake/food here
-    body_x dw 50 dup (?)    ; change max length of snake here
-    body_y dw 50 dup (?)    ; change max length of snake here
+    body_x dw 255 dup (?)    ; change max length of snake here
+    body_y dw 255 dup (?)    ; change max length of snake here
     snake_length dw 0
     key_pressed db 'd'
     prev_key db ?
     time_now db 00h
-    food_x dw 10
+    food_x dw 10            
     food_y dw 10
     temp_x dw ?             
     temp_y dw ?             
@@ -61,32 +60,35 @@
         lea bp, strScore ; string in es:bp 
         int 10h
 
-        mov ah, 02h         ; place cursor after strScore
-        mov dl, 7
-        int 10h
-        
-        mov ax, snake_length   ; convert score to decimal
-        aaa                 ; ah = tenths  |  al = ones
-        mov dx, ax          
-        add dh, '0'         ; convert to ascii
-        add dl, '0'
-        push dx             
+        mov ax, snake_length
+        mov cx, 03h
+        divide:         ; convert to decimal
+            xor dx, dx
+            mov bx, 0ah
+            div bx
+            push dx
+            loop divide
 
-        mov ah, 09h         ; interrupt for writing char
-        mov al, dh
-        mov bx, 000Fh
-        mov cx, 1
-        int 10h             ; write tenths place
+        mov bp, strScore_s
+        print:
+            inc bp
+            mov ah, 02h         ; place cursor after strScore
+            mov dx, bp 
+            int 10h
 
-        mov ah, 02h         ; place cursor after tenths place
-        mov dh, 0           
-        mov dl, 8
-        int 10h
+            pop dx
+            mov ah, 09h
+            mov bx, 000Fh
+            mov cx, 1
+            mov al, dl
+            add al, '0'
+            int 10h         ; print ascii
 
-        pop dx
-        mov ah, 09h
-        mov al, dl
-        int 10h             ; write ones place 
+            mov ax, strScore_s
+            mov bx, bp
+            sub bx, ax
+            cmp bx, 2
+            jle print        
         ret
 
     cls: ; clears the screen
