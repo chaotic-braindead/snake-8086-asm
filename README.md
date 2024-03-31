@@ -7,7 +7,7 @@
   <h2>NOTES</h2>
   <li>DOSBOX only</li>
   <li>probably very inefficient idk</li>
-  <li>fix flickering screen is to set cpu cycles to max on dosbox options</li>
+  <li>fix flickering screen by setting cpu cycles to max on dosbox options</li>
   <li>works on both TASM and MASM</li>
   <li>press esc key to exit game</li>
   <li>w, a, s, d to move</li>
