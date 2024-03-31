@@ -1,5 +1,5 @@
 ; NOTES: -probably very inefficient idk
-;        - atm, only works on TASM
+;        - works on both TASM and MASM
 ;        - press esc key to exit game
 ;        - w, a, s, d to move
 ; TODOs:
@@ -37,8 +37,8 @@
         int 10h
         lea si, body_x
         lea di, body_y 
-        mov word ptr [ds:si], 0Ah
-        mov word ptr [ds:di], 0Ah
+        mov word ptr [si], 0Ah
+        mov word ptr [di], 0Ah
         call rng 
         game_loop:
             call input
@@ -104,8 +104,8 @@
         mov bp, 0
         
         body:
-            mov cx, word ptr [ds:si+bp] ; get snake head x coord 
-            mov dx, word ptr [ds:di+bp] ; get snake head y coord
+            mov cx, word ptr [si] ; get snake head x coord 
+            mov dx, word ptr [di] ; get snake head y coord
 
         draw_body:
             mov ax, 0c0fh
@@ -114,19 +114,21 @@
 
             inc cx              
             mov ax, cx
-            sub ax, word ptr [ds:si+bp] 
+            sub ax, word ptr [si] 
             cmp ax, square_size
             jle draw_body       ; check x axis
 
-            mov cx, word ptr [ds:si+bp]
+            mov cx, word ptr [si]
             inc dx 
 
             mov ax, dx          
-            sub ax, word ptr [ds:di+bp]
+            sub ax, word ptr [di]
             cmp ax, square_size 
             jle draw_body       ; check y axis
             
             ; the next remaining lines are for checking if we have iterated through the entirety of the snake
+            add si, 2
+            add di, 2
             add bp, 2          
             mov ax, snake_length
             mov bx, 2
@@ -201,22 +203,25 @@
         lea di, body_y
 
         mov bp, 2
-        mov cx, word ptr [ds:si]
+        mov cx, word ptr [si]
         mov temp_x, cx              ; temporarily store the value of snake head x coord
-        mov cx, word ptr [ds:di]    
+        mov cx, word ptr [di]    
         mov temp_y, cx              ; temporarily store the value of snake head y coord
         
         body_move: 
+            add si, 2
+            add di, 2
             mov cx, temp_x                  ; get previous x coord   
-            mov dx, word ptr [ds:si+bp]
-            mov word ptr [ds:si+bp], cx
+            mov dx, word ptr [si]
+            mov word ptr [si], cx
             mov temp_x, dx                  ; store current x coord value for next iteration
             
             mov cx, temp_y                  ; get previous y coord 
-            mov dx, word ptr [ds:di+bp]
-            mov word ptr [ds:di+bp], cx
+            mov dx, word ptr [di]
+            mov word ptr [di], cx
             mov temp_y, dx                  ; store current y coord value for next iteration
             
+           
             add bp, 2                       ; get next coordinates from x and y arrays
             
             ; next remaining lines are for checking if we have iterated through the entirety of the snake
@@ -226,6 +231,8 @@
             cmp bp, ax
             jle body_move
         
+        lea si, body_x
+        lea di, body_y
         check_key:
             mov ax, square_size
             cmp key_pressed, 'w'
@@ -240,22 +247,22 @@
         move_up:
             cmp prev_key, 's'       ; if the previous key is the opposite direction, do nothing
             je ignore
-            sub word ptr [ds:di], ax 
+            sub word ptr [di], ax 
             jmp collision 
         move_down: 
             cmp prev_key, 'w'
             je ignore
-            add word ptr [ds:di], ax
+            add word ptr [di], ax
             jmp collision 
         move_left: 
             cmp prev_key, 'd'
             je ignore
-            sub word ptr [ds:si], ax
+            sub word ptr [si], ax
             jmp collision 
         move_right: 
             cmp prev_key, 'a'
             je ignore
-            add word ptr [ds:si], ax 
+            add word ptr [si], ax 
             jmp collision
         ignore: 
             mov ah, prev_key
@@ -263,8 +270,8 @@
             jmp check_key
         
         collision:      ; checks for collision with food   ! TODO: collision with self !
-            mov cx, word ptr [ds:si]
-            mov dx, word ptr [ds:di]
+            mov cx, word ptr [si]
+            mov dx, word ptr [di]
             mov ah, 0dh
             mov bh, 00h
             int 10h 
