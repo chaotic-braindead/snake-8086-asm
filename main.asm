@@ -3,14 +3,14 @@
 ;        - press esc key to exit game
 ;        - w, a, s, d to move
 ; TODOs:
-;       - try to fix flickering graphics which gets more noticeable as snake gets longer
+;       - try to fix flickering graphics which gets more noticeable as snake gets longer (a temporary fix is to increase cpu clock cycles on dosbox to around 100,000)
 ;       - check for collision with self
 ;       - score resets to 00 if greater than 15
 ;       - "rng" is not really random
 .model small
 .stack 10h
 .data
-    square_size dw 06h      ; change size of snake/food here
+    square_size dw 8h      ; change size of snake/food here
     body_x dw 50 dup (?)    ; change max length of snake here
     body_y dw 50 dup (?)    ; change max length of snake here
     snake_length dw 0
