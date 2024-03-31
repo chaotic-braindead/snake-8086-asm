@@ -227,16 +227,17 @@
             cmp bp, ax
             jle body_move
         
-        mov ax, square_size
-        cmp key_pressed, 'w'
-        je move_up 
-        cmp key_pressed, 'a' 
-        je move_left
-        cmp key_pressed, 's'
-        je move_down 
-        cmp key_pressed, 'd'
-        je move_right
-        jmp ignore
+        check_key:
+            mov ax, square_size
+            cmp key_pressed, 'w'
+            je move_up 
+            cmp key_pressed, 'a' 
+            je move_left
+            cmp key_pressed, 's'
+            je move_down 
+            cmp key_pressed, 'd'
+            je move_right
+            jmp ignore
         move_up:
             cmp prev_key, 's'       ; if the previous key is the opposite direction, do nothing
             je ignore
@@ -257,9 +258,10 @@
             je ignore
             add word ptr [ds:si], ax 
             jmp collision
-        ignore:
+        ignore: 
             mov ah, prev_key
             mov key_pressed, ah
+            jmp check_key
         
         collision:      ; checks for collision with food   ! TODO: collision with self !
             mov cx, word ptr [ds:si]
@@ -267,7 +269,9 @@
             mov ah, 0dh
             mov bh, 00h
             int 10h 
-
+       ; insert self collision here
+       
+       ; food collision
             cmp al, 04h
             jne return 
             mov ax, snake_length
