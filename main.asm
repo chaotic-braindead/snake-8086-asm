@@ -129,11 +129,8 @@
             add si, 2   ; get next x and y coords
             add di, 2
             ; the next remaining lines are for checking if we have iterated through the entirety of the snake
-            add bp, 2          
-            mov ax, snake_length
-            mov bx, 2
-            mul bx 
-            cmp bp, ax
+            inc bp         
+            cmp bp, snake_length
             jle body
 
         mov cx, food_x
@@ -202,7 +199,7 @@
         lea si, body_x 
         lea di, body_y
 
-        mov bp, 2
+        mov bp, 1
         mov cx, word ptr [si]
         mov temp_x, cx              ; temporarily store the value of snake head x coord
         mov cx, word ptr [di]    
@@ -222,12 +219,9 @@
             mov temp_y, dx                  ; store current y coord value for next iteration
             
            
-            add bp, 2                      
             ; next remaining lines are for checking if we have iterated through the entirety of the snake
-            mov ax, snake_length           
-            mov bx, 2
-            mul bx
-            cmp bp, ax
+            inc bp                           
+            cmp bp, snake_length
             jle body_move
         
         lea si, body_x
