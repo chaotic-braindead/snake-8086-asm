@@ -167,7 +167,7 @@
         int 16h
         
         cmp al, 27 ; check if escape key
-        jne update ; update key_pressed if not 2 
+        jne update ; update key_pressed if not esc
         mov ah, 4ch
         int 21h
 
@@ -275,9 +275,7 @@
        ; food collision
             cmp al, 04h
             jne return 
-            mov ax, snake_length
-            inc ax 
-            mov snake_length, ax
+            inc snake_length
             call rng 
             
         return: ret
