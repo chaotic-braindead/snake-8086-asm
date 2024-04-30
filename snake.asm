@@ -1,3 +1,4 @@
+; TODO: fix issue wherein overflows on both x and y axis mess up coordinates
 .model small
 .stack 100h
 .data
@@ -311,24 +312,32 @@
         move_up:
             cmp prev_key, 's'       ; if the previous key is the opposite direction, do nothing
             je ignore
+            cmp dl, 0   ; check if at the topmost side of the screen
+            jz stop
             dec dl 
             mov word ptr [si], dx
             jmp collision
         move_down: 
             cmp prev_key, 'w'
             je ignore
+            cmp dl, 24   ; check if at the bottommost side of the screen
+            jz stop
             inc dl 
             mov word ptr [si], dx
             jmp collision 
         move_left: 
             cmp prev_key, 'd'
             je ignore
+            cmp dh, 0   ; check if at the leftmost side of the screen
+            jz stop
             dec dh 
             mov word ptr [si], dx
             jmp collision 
         move_right: 
             cmp prev_key, 'a'
             je ignore
+            cmp dh, 39  ; check if at the rightmost side of the screen
+            jz stop
             inc dh
             mov word ptr [si], dx
             jmp collision
@@ -337,6 +346,7 @@
             mov key_pressed, ah
             jmp check_key
         
+        ; TODO: Collision 
         collision:
             mov ax, @data
             mov ds, ax 
@@ -365,9 +375,12 @@
             inc snake_length
          
             call rng 
-       
+    
     return: 
         ret
+    stop:
+        mov ah, 4ch
+        int 21h
 
     snake_head_up: 
         DB 00h,00h,00h,00h,00h,00h,00h,00h     ;  0
