@@ -7,13 +7,13 @@
 ;       - check for collision with self
 ;       - food "rng" is not really random; sometimes food spawns on on snake's body 
 .model small
-.stack 10h
+.stack 100h
 
 .data
     snake_pos dw 255 dup (?) ;;
-    snake_length dw 0
+    snake_length dw 1
     key_pressed db 'd'
-    prev_key db ?
+    prev_key db 'w'
     time_now db 00h
     food_pos dw 0A0Ah
     temp_pos dw ?
@@ -33,12 +33,13 @@
         int 10h
         lea si, snake_pos ;;
         mov word ptr [si], 0101h ;;   
+        mov word ptr [si+2], 0102h
 
         call rng 
         game_loop:
             call input
-            call draw
             call write_score
+            call draw
             call move
             call cls
             jmp game_loop
@@ -118,27 +119,28 @@
             mul bx 
             add di, ax
         pop dx 
+       
+       lea si, snake_head_up
+      ;cmp key_pressed, 'w'
+      ;je head_up
+      ;cmp key_pressed, 's'
+      ;je head_down
+      ;cmp key_pressed, 'a'
+      ;je head_left
+      ;cmp key_pressed, 'd'
+      ;je head_right
 
-        cmp key_pressed, 'w'
-        je head_up
-        cmp key_pressed, 's'
-        je head_down
-        cmp key_pressed, 'a'
-        je head_left
-        cmp key_pressed, 'd'
-        je head_right
-
-        head_up: 
-            lea si, snake_head_up
-            jmp draw_head
-        head_down: 
-            lea si, snake_head_down
-            jmp draw_head
-        head_left: 
-            lea si, snake_head_left
-            jmp draw_head
-        head_right: 
-            lea si, snake_head_right
+        ;head_up: 
+        ;    lea si, snake_head_up
+        ;    jmp draw_head
+        ;head_down: 
+        ;    lea si, snake_head_down
+        ;    jmp draw_head
+        ;head_left: 
+        ;    lea si, snake_head_left
+        ;    jmp draw_head
+        ;head_right: 
+        ;    lea si, snake_head_right
         
         draw_head:
             mov cl, 8
@@ -159,56 +161,53 @@
         dec cl 
         jnz y_axis
 
-        mov bp, 0
-        lea si, snake_pos;;
-        push si
-        
-        try:
-            pop si
-            cmp bp, snake_length
-            jge draw_food
-            add si, 2
-            mov ax, @data
-            mov ds, ax
-            mov dx, word ptr [si]
-            push si
-
-            mov ax, 0A000h ;; 
-            mov es, ax     ;;
-            mov ax, @code
-            mov ds, ax
-            push dx
-                mov ax, 8
-                mul dh
-                mov di, ax
-                mov ax, 8*320
-                mov bx, 0
-                add bl, dl
-                mul bx 
-                add di, ax
-            pop dx 
-
-            lea si, snake_body 
-            mov cl, 8
-            
-            draw_body_y:
-                push di 
-                mov ch, 8
-            draw_body_x:
-                mov al, [ds:si]
-                xor al, [es:di]
-                mov [es:di], al
-                inc si
-                inc di 
-                dec ch
-                jnz draw_body_x
-            pop di
-            add di, 320
-            inc bl
-            dec cl 
-            jnz draw_body_y 
-            inc bp
-            jmp try
+       mov bp, snake_length
+       lea si, snake_pos
+       add si, 2
+      try:
+          cmp bp, 0
+          jle draw_food
+          mov ax, @data
+          mov ds, ax
+          mov dx, word ptr [si]
+          add si, 2
+          push si
+          mov ax, 0A000h ;; 
+          mov es, ax     ;;
+          mov ax, @code
+          mov ds, ax
+          push dx
+              mov ax, 8
+              mul dh
+              mov di, ax
+              mov ax, 8*320
+              mov bx, 0
+              add bl, dl
+              mul bx 
+              add di, ax
+          pop dx 
+          lea si, snake_body 
+          mov cl, 8
+          
+          draw_body_y:
+              push di 
+              mov ch, 8
+          draw_body_x:
+              mov al, [ds:si]
+              xor al, [es:di]
+              mov [es:di], al
+              inc si
+              inc di 
+              dec ch
+              jnz draw_body_x
+          pop di
+          add di, 320
+          inc bl
+          dec cl 
+          jnz draw_body_y 
+          dec bp
+          pop si
+          jmp try
 
     draw_food: 
     mov dx, food_pos
@@ -228,7 +227,6 @@
     pop dx 
     lea si, food_map
     mov cl, 8
-
     food_y_axis:
         push di
             mov ch, 8
@@ -296,25 +294,28 @@
         je move     ; keep checking until we have a different time
         mov time_now, dl
 
+       mov ax, @data
+       mov ds, ax
+       lea si, snake_pos
+       mov dx, word ptr [si]
+       mov temp_pos, dx
+       mov bp, snake_length
+;
+       body_move: 
+           cmp bp, 0
+           je skip
+           add si, 2                       ; get next x and y coords
+           mov dx, word ptr [si]  
+           mov cx, temp_pos
+           mov word ptr [si], cx 
+           mov temp_pos, dx
+           dec bp 
+           jmp body_move
+
+        skip:
         mov ax, @data
         mov ds, ax
         lea si, snake_pos
-        mov bp, 0
-        mov dx, word ptr [si]
-        mov temp_pos, dx
-        body_move: 
-            add si, 2                       ; get next x and y coords
-            mov dx, word ptr [si]  
-            mov cx, temp_pos
-            mov word ptr [si], cx 
-            mov temp_pos, dx
-            inc bp 
-            cmp bp, snake_length
-            jl body_move
-        
-        lea si, snake_pos
-        mov ax, @data
-        mov ds, ax
         check_key:
             mov dx, word ptr [si]
             cmp key_pressed, 'w'
@@ -330,38 +331,24 @@
             cmp prev_key, 's'       ; if the previous key is the opposite direction, do nothing
             je ignore
             dec dl 
-            push dx
-            call collision
-            pop dx
             mov word ptr [si], dx
             jmp return
         move_down: 
             cmp prev_key, 'w'
             je ignore
             inc dl 
-            push dx
-            call collision
-            pop dx
             mov word ptr [si], dx
-            ;mov word ptr [si], dx
-            ;pop di
             jmp return 
         move_left: 
             cmp prev_key, 'd'
             je ignore
             dec dh 
-            push dx
-            call collision
-            pop dx
             mov word ptr [si], dx
             jmp return 
         move_right: 
             cmp prev_key, 'a'
             je ignore
             inc dh
-            push dx 
-            call collision
-            pop dx 
             mov word ptr [si], dx
             jmp return 
         ignore: 
