@@ -9,14 +9,55 @@
     time_now db 00h
     food_pos dw 0A0Ah
     temp_pos dw ?
+    border_pos dw 152 dup (?)
 
-   
     strScore db 'Score:'
     strScore_s equ $-strScore
   
 .code
     mov ax, @data
     mov ds, ax 
+    mov ax, 0001h
+    lea di, border_pos
+
+    gen_border_top:
+        cmp ah, 28h
+        je bottom_border
+        mov word ptr [di], ax 
+        inc ah
+        add di, 2
+        jmp gen_border_top
+    
+    bottom_border:
+        mov ax, 0031h
+    gen_border_bottom:
+        cmp ah, 28h
+        je left_border 
+        mov word ptr [di], ax 
+        inc ah 
+        add di, 2
+        jmp gen_border_bottom
+
+    left_border:
+        mov ax, 0002h
+    gen_border_left:
+        cmp al, 18h
+        je right_border
+        mov word ptr [di], ax 
+        inc al 
+        add di, 2
+        jmp gen_border_left
+    
+    right_border:
+        mov ax, 2702h
+    gen_border_right:
+        cmp al, 18h
+        je main
+        mov word ptr [di], ax 
+        inc al 
+        add di, 2
+        jmp gen_border_right
+    
     main:
         mov ax, 0013h
         int 10h
@@ -224,9 +265,31 @@
             mov ds, ax
             lea si, food_map
             call draw_img
+        
+        draw_border:
+            mov ax, @data
+            mov ds, ax
+            lea si, border_pos
+            mov bp, 0
+            do:
+                mov dx, word ptr [si]
+                add si, 2
+                push si
+                call calculate_pos 
+                mov ax, @code 
+                mov ds, ax
+                lea si, wall
+                call draw_img 
+                pop si 
+                mov ax, @data
+                mov ds, ax 
+                inc bp
+                cmp bp, 28h+28h+30h
+                jl do
+
         ret
 
-    calculate_pos:
+    calculate_pos:  ; args: dx = coordinate
         mov ax, @code
         mov ds, ax
         push dx
@@ -241,7 +304,7 @@
         pop dx 
         ret
 
-    draw_img:
+    draw_img:   ; args: si = bitmap addr
         mov ax, 0A000h ;; 
         mov es, ax     ;;
         mov cl, 8
@@ -264,6 +327,8 @@
         ret
 
     rng:       
+        mov ax, @data
+        mov ds, ax
         mov ax, 25173
         mul food_pos
         add ax, 13849
@@ -312,7 +377,7 @@
         move_up:
             cmp prev_key, 's'       ; if the previous key is the opposite direction, do nothing
             je ignore
-            cmp dl, 0   ; check if at the topmost side of the screen
+            cmp dl, 2   ; check if at the topmost side of the screen
             jz stop
             dec dl 
             mov word ptr [si], dx
@@ -320,7 +385,7 @@
         move_down: 
             cmp prev_key, 'w'
             je ignore
-            cmp dl, 24   ; check if at the bottommost side of the screen
+            cmp dl, 22   ; check if at the bottommost side of the screen
             jz stop
             inc dl 
             mov word ptr [si], dx
@@ -328,7 +393,7 @@
         move_left: 
             cmp prev_key, 'd'
             je ignore
-            cmp dh, 0   ; check if at the leftmost side of the screen
+            cmp dh, 1   ; check if at the leftmost side of the screen
             jz stop
             dec dh 
             mov word ptr [si], dx
@@ -336,7 +401,7 @@
         move_right: 
             cmp prev_key, 'a'
             je ignore
-            cmp dh, 39  ; check if at the rightmost side of the screen
+            cmp dh, 38  ; check if at the rightmost side of the screen
             jz stop
             inc dh
             mov word ptr [si], dx
@@ -346,10 +411,11 @@
             mov key_pressed, ah
             jmp check_key
         
-        ; TODO: Collision 
         collision:
             mov ax, @data
             mov ds, ax 
+
+            ; food collision
             lea si, snake_pos
             mov ax, word ptr [si]
             mov bx, food_pos
@@ -374,10 +440,10 @@
  
             inc snake_length
          
-            call rng 
-    
+            call rng ; for some reason, collision cannot be detected when a new random coord is given. only works on non-overflowed values
     return: 
         ret
+        
     stop:
         mov ah, 4ch
         int 21h
@@ -436,5 +502,14 @@
         DB 00h,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,00h     ;  5
         DB 00h,00h,0Ch,0Ch,0Ch,0Ch,00h,00h     ;  6
         DB 00h,00h,00h,00h,00h,00h,00h,00h     ;  7
-    
+    wall:
+        DB 06h,04h,06h,06h,06h,06h,04h,06h
+        DB 04h,04h,06h,06h,06h,06h,04h,04h
+        DB 06h,04h,0Eh,0Eh,0Eh,0Eh,04h,06h
+        DB 06h,04h,0Eh,06h,06h,0Eh,04h,06h
+        DB 06h,04h,0Eh,06h,06h,0Eh,04h,06h
+        DB 06h,04h,0Eh,0Eh,0Eh,0Eh,04h,06h
+        DB 04h,04h,06h,06h,06h,06h,04h,04h
+        DB 06h,04h,06h,06h,06h,06h,04h,06h
+
 end
