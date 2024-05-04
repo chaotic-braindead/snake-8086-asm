@@ -3,13 +3,13 @@
 .stack 100h
 .data
     snake_pos dw 255 dup (?) ; higher byte = x coord | lower byte = y coord
-    snake_length dw 2
+    snake_length dw 0
     key_pressed db 'd'
     prev_key db ?
     time_now db 00h
     food_pos dw 0A0Ah
     temp_pos dw ?
-    border_pos dw 152 dup (?)
+    border_pos dw 28h+28h+18h+18h dup (?)
 
     strScore db 'Score:'
     strScore_s equ $-strScore
@@ -66,9 +66,8 @@
         int 10h
         lea si, snake_pos ;;
         mov word ptr [si], 0A0Ah ;;   
-        mov word ptr [si+2], 090Ah ;;   
-        mov word ptr [si+4], 080Ah ;;   
-
+    ;    mov word ptr [si+2], 090Ah ;;   
+    ;    mov word ptr [si+4], 080Ah ;;   
 
         ;call rng
         game_loop:
@@ -284,7 +283,7 @@
                 mov ax, @data
                 mov ds, ax 
                 inc bp
-                cmp bp, 28h+28h+30h
+                cmp bp, 28h+28h+18h+18h
                 jl do
 
         ret
@@ -344,22 +343,22 @@
         je move     ; keep checking until we have a different time
         mov time_now, dl
         
-       lea si, snake_pos
-       mov dx, word ptr [si]
-       mov temp_pos, dx
-       mov bp, snake_length
-       body_move: 
-          cmp bp, 0
-          je skip
-          add si, 2                       ; get next x and y coords
-          mov dx, word ptr [si]  
-          mov cx, temp_pos
-          mov word ptr [si], cx 
-          mov temp_pos, dx
-          dec bp 
-          jmp body_move
+        lea si, snake_pos
+        mov dx, word ptr [si]
+        mov temp_pos, dx
+        mov bp, snake_length
+        body_move: 
+            cmp bp, 0
+            je skip
+            add si, 2                       ; get next x and y coords
+            mov dx, word ptr [si]  
+            mov cx, temp_pos
+            mov word ptr [si], cx 
+            mov temp_pos, dx
+            dec bp 
+            jmp body_move
 
-       skip:
+        skip:
             mov ax, @data
             mov ds, ax
             lea si, snake_pos
@@ -410,11 +409,48 @@
             mov ah, prev_key
             mov key_pressed, ah
             jmp check_key
-        
+        jmp collision 
+        stop:
+            mov ah, 4ch
+            int 21h
         collision:
             mov ax, @data
             mov ds, ax 
+            ; self collision
+           lea si, snake_pos
+           lea di, snake_pos
+           mov bp, snake_length
+           add di, 6
+           body_collision: ; TODO: Fix
+               cmp bp, 3
+               jle food_collision
+               dec bp
+               add di, 2
+               mov ax, word ptr [si]
+               mov bx, word ptr [di]
 
+               inc ah 
+               cmp ah, bh 
+               jng body_collision
+               dec ah 
+               
+               inc bh
+               cmp ah, bh
+               jnl body_collision
+               dec bh 
+               
+               inc al
+               cmp al, bl 
+               jng body_collision
+               dec al
+
+               inc bl
+               cmp al, bl
+               jnl body_collision
+               dec bl 
+               jmp stop
+
+            food_collision:
             ; food collision
             lea si, snake_pos
             mov ax, word ptr [si]
@@ -437,71 +473,71 @@
             inc bl
             cmp al, bl
             jnl return 
- 
+
             inc snake_length
-         
-            call rng ; for some reason, collision cannot be detected when a new random coord is given. only works on non-overflowed values
+            
+            mov ax, 120Ch 
+            mov food_pos, ax
+            ;call rng ; for some reason, collision cannot be detected when a new random coord is given. only works on non-overflowed values
     return: 
         ret
         
-    stop:
-        mov ah, 4ch
-        int 21h
+    
 
     snake_head_up: 
-        DB 00h,00h,00h,00h,00h,00h,00h,00h     ;  0
-        DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h     ;  1
-        DB 00h,00h,0Ah,0Ah,0Ah,0Ah,00h,00h     ;  2
-        DB 00h,0Ah,00h,0Ah,0Ah,00h,0Ah,00h     ;  3
-        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     ;  4
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     ;  5
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     ;  6
-        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     ;  7
+        DB 00h,00h,00h,00h,00h,00h,00h,00h     
+        DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h     
+        DB 00h,00h,0Ah,0Ah,0Ah,0Ah,00h,00h     
+        DB 00h,0Ah,00h,0Ah,0Ah,00h,0Ah,00h     
+        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     
+        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
+        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
+        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     
     snake_head_down: 
-        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     ;  7
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     ;  6
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     ;  5
-        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     ;  4
-        DB 00h,0Ah,00h,0Ah,0Ah,00h,0Ah,00h     ;  3
-        DB 00h,00h,0Ah,0Ah,0Ah,0Ah,00h,00h     ;  2
-        DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h     ;  1
-        DB 00h,00h,00h,00h,00h,00h,00h,00h     ;  0
+        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h    
+        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
+        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
+        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     
+        DB 00h,0Ah,00h,0Ah,0Ah,00h,0Ah,00h     
+        DB 00h,00h,0Ah,0Ah,0Ah,0Ah,00h,00h     
+        DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h     
+        DB 00h,00h,00h,00h,00h,00h,00h,00h     
     snake_head_left: 
-        DB 00h,00h,00h,00h,00h,00h,00h,00h     ;  0
-        DB 00h,00h,00h,0Ah,0Ah,02h,00h,0Ah     ;  7
-        DB 00h,00h,0Ah,00h,0Ah,0Ah,0Ah,02h     ;  1
-        DB 00h,0Ch,0Ah,0Ah,0Ah,02h,0Ah,0Ah     ;  3
-        DB 00h,0Ch,0Ah,0Ah,0Ah,02h,0Ah,0Ah     ;  2
-        DB 00h,00h,0Ah,00h,0Ah,0Ah,0Ah,02h     ;  6
-        DB 00h,00h,00h,0Ah,0Ah,02h,00h,0Ah     ;  4
-        DB 00h,00h,00h,00h,00h,00h,00h,00h     ;  5
+        DB 00h,00h,00h,00h,00h,00h,00h,00h     
+        DB 00h,00h,00h,0Ah,0Ah,02h,00h,0Ah     
+        DB 00h,00h,0Ah,00h,0Ah,0Ah,0Ah,02h     
+        DB 00h,0Ch,0Ah,0Ah,0Ah,02h,0Ah,0Ah     
+        DB 00h,0Ch,0Ah,0Ah,0Ah,02h,0Ah,0Ah     
+        DB 00h,00h,0Ah,00h,0Ah,0Ah,0Ah,02h     
+        DB 00h,00h,00h,0Ah,0Ah,02h,00h,0Ah     
+        DB 00h,00h,00h,00h,00h,00h,00h,00h     
     snake_head_right: 
-        DB 00h,00h,00h,00h,00h,00h,00h,00h     ;  4
-        DB 0Ah,00h,02h,0Ah,0Ah,0Ah,00h,00h     ;  1
-        DB 02h,0Ah,0Ah,0Ah,00h,0Ah,00h,00h     ;  0
-        DB 0Ah,0Ah,02h,0Ah,0Ah,0Ah,0Ch,00h     ;  2
-        DB 0Ah,0Ah,02h,0Ah,0Ah,0Ah,0Ch,00h     ;  3
-        DB 02h,0Ah,0Ah,0Ah,00h,0Ah,00h,00h     ;  7
-        DB 0Ah,00h,02h,0Ah,0Ah,0Ah,00h,00h     ;  6
-        DB 00h,00h,00h,00h,00h,00h,00h,00h     ;  5
+        DB 00h,00h,00h,00h,00h,00h,00h,00h     
+        DB 0Ah,00h,02h,0Ah,0Ah,0Ah,00h,00h     
+        DB 02h,0Ah,0Ah,0Ah,00h,0Ah,00h,00h     
+        DB 0Ah,0Ah,02h,0Ah,0Ah,0Ah,0Ch,00h     
+        DB 0Ah,0Ah,02h,0Ah,0Ah,0Ah,0Ch,00h     
+        DB 02h,0Ah,0Ah,0Ah,00h,0Ah,00h,00h     
+        DB 0Ah,00h,02h,0Ah,0Ah,0Ah,00h,00h     
+        DB 00h,00h,00h,00h,00h,00h,00h,00h     
     snake_body:
-        DB 00h,00h,00h,00h,00h,00h,00h,00h     ;  0
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     ;  1
-        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     ;  2
-        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     ;  3
-        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     ;  4
-        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     ;  5
-        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     ;  6
-        DB 00h,00h,00h,00h,00h,00h,00h,00h     ;  7
+        DB 00h,00h,00h,00h,00h,00h,00h,00h     
+        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
+        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     
+        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     
+        DB 00h,0Ah,0Ah,0Ah,0Ah,0Ah,0Ah,00h     
+        DB 00h,0Ah,02h,0Ah,0Ah,02h,0Ah,00h     
+        DB 00h,02h,0Ah,0Ah,0Ah,0Ah,02h,00h     
+        DB 00h,00h,00h,00h,00h,00h,00h,00h     
     food_map:
-        DB 00h,00h,00h,0Ah,02h,00h,00h,00h     ;  0
-        DB 00h,00h,0Ch,00h,00h,0Ch,00h,00h     ;  1
-        DB 00h,0Ch,0Fh,0Ch,0Ch,0Ch,0Ch,00h     ;  2
-        DB 00h,0Fh,0Ch,0Ch,0Ch,0Ch,0Ch,00h     ;  3
-        DB 00h,0Fh,0Ch,0Ch,0Ch,0Ch,0Ch,00h     ;  4
-        DB 00h,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,00h     ;  5
-        DB 00h,00h,0Ch,0Ch,0Ch,0Ch,00h,00h     ;  6
-        DB 00h,00h,00h,00h,00h,00h,00h,00h     ;  7
+        DB 00h,00h,00h,0Ah,02h,00h,00h,00h  
+        DB 00h,00h,0Ch,00h,00h,0Ch,00h,00h  
+        DB 00h,0Ch,0Fh,0Ch,0Ch,0Ch,0Ch,00h  
+        DB 00h,0Fh,0Ch,0Ch,0Ch,0Ch,0Ch,00h  
+        DB 00h,0Fh,0Ch,0Ch,0Ch,0Ch,0Ch,00h  
+        DB 00h,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,00h  
+        DB 00h,00h,0Ch,0Ch,0Ch,0Ch,00h,00h  
+        DB 00h,00h,00h,00h,00h,00h,00h,00h  
     wall:
         DB 06h,04h,06h,06h,06h,06h,04h,06h
         DB 04h,04h,06h,06h,06h,06h,04h,04h
@@ -511,5 +547,4 @@
         DB 06h,04h,0Eh,0Eh,0Eh,0Eh,04h,06h
         DB 04h,04h,06h,06h,06h,06h,04h,04h
         DB 06h,04h,06h,06h,06h,06h,04h,06h
-
 end
