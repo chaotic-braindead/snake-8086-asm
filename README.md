@@ -16,4 +16,5 @@
   <h2>TODOs/bugs</h2>
   <li>flickering graphics on lower cpu cycles which becomes more noticeable as snake gets longer </li>
   <li>food collision does not work on randomly generated food_pos, possibly due to overflow; only works on static coordinates</li>
+  <li>fix food coordinate rng</li> 
 </ul>
