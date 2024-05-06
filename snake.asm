@@ -2,7 +2,7 @@
 .model small
 .stack 100h
 .data
-    snake_pos dw 960 dup (?) ; higher byte = x coord | lower byte = y coord
+    snake_pos dw 960 dup (?) ; higher byte = x coord | lower byte = y coord    ; dosbox 27h x 18h adjusted for 8x8 sprites  
     snake_length dw 0
     key_pressed db 'd'
     prev_key db ?
@@ -15,7 +15,10 @@
     
     random_seed dw 0
 
-    med1_pos dw 505ch,5064h,5006h,0f5ch,0f64h,0f06h
+    difficulty db 2
+    easy_pos dw 0000h
+    med_pos dw 0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h                  
+    hard_pos dw 0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h,0110h,0210h,0310h,0410h,0510h,0610h,260Ah,250Ah,240Ah,230Ah,220Ah,210Ah
 
     strScore db 'Score:'
     strScore_s equ $-strScore
@@ -293,33 +296,43 @@
                 cmp bp, 28h+28h+18h+18h
                 jl do
         
-        ;cmp difficulty, 0
-        ;je draw_easy
-        ;cmp difficulty, 1
-        ;je draw_med
-        ;cmp difficulty, 2
-        ;je draw_hard
+        mov ax, @data
+        mov ds, ax 
 
+        cmp difficulty, 0
+        je draw_easy
+        cmp difficulty, 1
+        je draw_med
+        cmp difficulty, 2
+        je draw_hard
+
+        draw_easy: 
+            lea si, easy_pos
+            mov bp, 5
+            jmp draw_wall
         draw_med:
+            lea si, med_pos
+            mov bp, 12
+            jmp draw_wall 
+        draw_hard:
+            lea si, hard_pos
+            mov bp, 24
+
+        draw_wall: 
+            mov dx, word ptr [si]
+            add si, 2
+            push si
+            call calculate_pos 
+            mov ax, @code 
+            mov ds, ax
+            lea si, wall
+            call draw_img 
+            pop si 
             mov ax, @data
             mov ds, ax 
-            lea si, med1_pos
-            mov bp, 6
-            med_wall: 
-                mov dx, word ptr [si]
-                add si, 2
-                push si
-                call calculate_pos 
-                mov ax, @code 
-                mov ds, ax
-                lea si, wall
-                call draw_img 
-                pop si 
-                mov ax, @data
-                mov ds, ax 
-                dec bp 
-                cmp bp, 0
-                jg med_wall
+            dec bp 
+            cmp bp, 0
+            jne draw_wall
         ret
 
     calculate_pos:  ; args: dx = coordinate | ret: di = coord in vram
@@ -582,21 +595,21 @@
 
                     inc ah
                     cmp ah, bh 
-                    jng return 
+                    jng wall_collision 
                     dec ah 
 
                     inc bh
                     cmp ah, bh
-                    jnl return
+                    jnl wall_collision
 
                     inc al
                     cmp al, bl 
-                    jng return 
+                    jng wall_collision 
                     dec al
 
                     inc bl
                     cmp al, bl
-                    jnl return 
+                    jnl wall_collision 
 
                     inc snake_length
                     
@@ -604,6 +617,60 @@
                     ;mov food_pos, ax
                     call random
                     ;call rng ; for some reason, collision cannot be detected when a new random coord is given. only works on non-overflowed values
+            wall_collision:
+                mov ax, @data
+                mov ds, ax 
+                lea di, snake_pos 
+
+                cmp difficulty, 0
+                je collision_easy 
+                cmp difficulty, 1
+                je collision_med
+                cmp difficulty, 2
+                je collision_hard 
+
+                collision_easy:
+                    lea si, easy_pos
+                    mov bp, 1
+                    jmp init
+                collision_med:
+                    lea si, med_pos
+                    mov bp, 12
+                    jmp init
+                collision_hard: 
+                    lea si, hard_pos 
+                    mov bp, 24
+                
+                init:
+                    sub si, 2
+                check_wall_col:
+                    cmp bp, 0
+                    jl return
+                    dec bp
+                    add si, 2
+                    mov ax, word ptr [di]
+                    mov bx, word ptr [si]
+                    inc ah
+                    cmp ah, bh 
+                    jng check_wall_col 
+                    dec ah 
+
+                    inc bh
+                    cmp ah, bh
+                    jnl check_wall_col 
+
+                    inc al
+                    cmp al, bl 
+                    jng check_wall_col 
+                    dec al
+
+                    inc bl
+                    cmp al, bl
+                    jnl check_wall_col
+                     
+                    mov ah, 4ch
+                    int 21h
+                
     return: 
         ret
         
