@@ -18,7 +18,7 @@
     
     random_seed dw 0
 
-    difficulty db 2 ; change difficulty here
+    difficulty db 2 ; change difficulty here | 0 = easy, 1 = med, 2 = hard
 
     med_pos dw 0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h                  
     hard_pos dw 0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h,0110h,0210h,0310h,0410h,0510h,0610h,260Ah,250Ah,240Ah,230Ah,220Ah,210Ah

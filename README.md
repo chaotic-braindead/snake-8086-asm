@@ -12,6 +12,7 @@
   <li>works on both TASM and MASM</li>
   <li>press esc key to exit game</li>
   <li>w, a, s, d to move</li>
+  <li>change difficulty in source code /0 = easy, 1 = med, 2 = hard</li>
 </ul>
 <ul>
   <h2>TODOs/bugs</h2>
