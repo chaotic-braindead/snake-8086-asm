@@ -2,7 +2,7 @@
 .model small
 .stack 100h
 .data
-    snake_pos dw 255 dup (?) ; higher byte = x coord | lower byte = y coord
+    snake_pos dw 960 dup (?) ; higher byte = x coord | lower byte = y coord
     snake_length dw 0
     key_pressed db 'd'
     prev_key db ?
@@ -10,6 +10,12 @@
     food_pos dw 0A0Ah
     temp_pos dw ?
     border_pos dw 28h+28h+18h+18h dup (?)
+    random_table1 db 0Ah,9Fh,0F0h,1Bh,69h,3Dh,0E8h,52h,0C6h,41h,0B7h,74h,23h,0ACh,8Eh,0D5h
+    random_table2 db 9Ch,0EEh,0B5h,0CAh,0AFh,0F0h,0DBh,69h,3Dh,58h,22h,06h,41h,17h,74h,83h
+    
+    random_seed dw 0
+
+    med1_pos dw 505ch,5064h,5006h,0f5ch,0f64h,0f06h
 
     strScore db 'Score:'
     strScore_s equ $-strScore
@@ -69,7 +75,7 @@
     ;    mov word ptr [si+2], 090Ah ;;   
     ;    mov word ptr [si+4], 080Ah ;;   
 
-        ;call rng
+        ;call random
         game_loop:
             call write_score
             call input
@@ -189,7 +195,8 @@
         je head_left
         cmp bl, 'd'
         je head_right 
-        
+
+        ; if invalid key is pressed, draw same head as the key pressed before
         cmp bh, 'w'
         je head_up
         cmp bh, 's'
@@ -197,9 +204,9 @@
         cmp bh, 'a'
         je head_left
         cmp bh, 'd'
-        je head_right         
-
-        head_up:
+        je head_right 
+    
+        head_up: 
             lea si, snake_head_up
             jmp draw_head
         head_down:
@@ -285,10 +292,37 @@
                 inc bp
                 cmp bp, 28h+28h+18h+18h
                 jl do
+        
+        ;cmp difficulty, 0
+        ;je draw_easy
+        ;cmp difficulty, 1
+        ;je draw_med
+        ;cmp difficulty, 2
+        ;je draw_hard
 
+        draw_med:
+            mov ax, @data
+            mov ds, ax 
+            lea si, med1_pos
+            mov bp, 6
+            med_wall: 
+                mov dx, word ptr [si]
+                add si, 2
+                push si
+                call calculate_pos 
+                mov ax, @code 
+                mov ds, ax
+                lea si, wall
+                call draw_img 
+                pop si 
+                mov ax, @data
+                mov ds, ax 
+                dec bp 
+                cmp bp, 0
+                jg med_wall
         ret
 
-    calculate_pos:  ; args: dx = coordinate
+    calculate_pos:  ; args: dx = coordinate | ret: di = coord in vram
         mov ax, @code
         mov ds, ax
         push dx
@@ -325,10 +359,102 @@
         jnz y_axis
         ret
 
+    random:
+        push ds
+            mov ax, @data
+            mov ds, ax
+            mov bh,16
+            mov bl,160-16
+            call dorangedrandom	
+            mov dh, al
+            mov bh,16
+            mov bl,200-16
+            call dorangedrandom	
+            mov dl, al
+            mov food_pos, dx 
+            
+        pop ds
+        ret		
+        
+    DoRandomByte1:
+        mov al,cl			;Get 1st seed
+    DoRandomByte1b:
+        ror al,1			;Rotate Right
+        ror al,1
+        xor al,cl			;Xor 1st Seed
+        ror al,1
+        ror al,1			;Rotate Right
+        xor al,ch			;Xor 2nd Seed
+        ror al,1			;Rotate Right
+        xor al,10011101b	;Xor Constant
+        xor al,cl			;Xor 1st seed
+        ret
+
+    DoRandomByte2:
+        lea bx, random_table1
+        mov ah,0
+        mov al,ch		
+        xor al,00001011b
+        and al,00001111b	;Convert 2nd seed low nibble to Lookup
+        
+        mov si,ax
+        mov dh,[es:bx+si]		;Get Byte from LUT 1
+        
+        call DoRandomByte1	
+        and al,00001111b		;Convert random number from 1st 
+        
+        lea bx, random_table2	;geneerator to Lookup
+        mov si,ax
+        mov al,[es:bx+si]		;Get Byte from LUT2
+        
+        xor al,dh				;Xor 1st lookup
+        ret
+        
+        
+    DoRandom:			;RND outputs to A (no input)
+        push bx
+        push cx
+        push dx
+            mov cx, random_seed    ;Get and update
+            inc cx							  	  ;Random Seed
+            mov random_seed,cx
+            call DoRandomWord
+            mov al,dl
+            xor al,dh
+        pop dx
+        pop cx
+        pop bx
+        ret
+        
+    DoRandomWord:		;Return Random pair in HL from Seed BC
+        call DoRandomByte1		;Get 1st byte
+        mov dh,al
+        push dx
+        push cx
+        push bx
+            call DoRandomByte2	;Get 2nd byte
+        pop bx
+        pop cx
+        pop dx
+        mov dl,al
+        inc cx
+        ret	
+        
+        
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    DoRangedRandom: 		;Return a value between B and C
+        call DoRandom
+        cmp AL,BH
+        jc DoRangedRandom
+        cmp AL,BL
+        jnc DoRangedRandom
+        ret
+	
     rng:       
         mov ax, @data
         mov ds, ax
-        mov ax, 25173
+        mov ax, 1839h
         mul food_pos
         add ax, 13849
         mov food_pos, ax
@@ -409,7 +535,6 @@
             mov ah, prev_key
             mov key_pressed, ah
             jmp check_key
-        jmp collision 
         stop:
             mov ah, 4ch
             int 21h
@@ -417,68 +542,68 @@
             mov ax, @data
             mov ds, ax 
             ; self collision
-           lea si, snake_pos
-           lea di, snake_pos
-           mov bp, snake_length
-           add di, 6
-           body_collision: ; TODO: Fix
-               cmp bp, 3
-               jle food_collision
-               dec bp
-               add di, 2
-               mov ax, word ptr [si]
-               mov bx, word ptr [di]
-
-               inc ah 
-               cmp ah, bh 
-               jng body_collision
-               dec ah 
-               
-               inc bh
-               cmp ah, bh
-               jnl body_collision
-               dec bh 
-               
-               inc al
-               cmp al, bl 
-               jng body_collision
-               dec al
-
-               inc bl
-               cmp al, bl
-               jnl body_collision
-               dec bl 
-               jmp stop
-
-            food_collision:
-            ; food collision
             lea si, snake_pos
-            mov ax, word ptr [si]
-            mov bx, food_pos
+            lea di, snake_pos
+            mov bp, snake_length
+            add di, 6
+            body_collision:
+                cmp bp, 3
+                jle food_collision
+                dec bp
+                add di, 2
+                mov ax, word ptr [si]
+                mov bx, word ptr [di]
 
-            inc ah
-            cmp ah, bh 
-            jng return 
-            dec ah 
+                inc ah 
+                cmp ah, bh 
+                jng body_collision
+                dec ah 
+                
+                inc bh
+                cmp ah, bh
+                jnl body_collision
+                dec bh 
+                
+                inc al
+                cmp al, bl 
+                jng body_collision
+                dec al
 
-            inc bh
-            cmp ah, bh
-            jnl return
+                inc bl
+                cmp al, bl
+                jnl body_collision
+                dec bl 
+                jmp stop
 
-            inc al
-            cmp al, bl 
-            jng return 
-            dec al
+                food_collision:
+                    lea si, snake_pos
+                    mov ax, word ptr [si]
+                    mov bx, food_pos
 
-            inc bl
-            cmp al, bl
-            jnl return 
+                    inc ah
+                    cmp ah, bh 
+                    jng return 
+                    dec ah 
 
-            inc snake_length
-            
-            mov ax, 120Ch 
-            mov food_pos, ax
-            ;call rng ; for some reason, collision cannot be detected when a new random coord is given. only works on non-overflowed values
+                    inc bh
+                    cmp ah, bh
+                    jnl return
+
+                    inc al
+                    cmp al, bl 
+                    jng return 
+                    dec al
+
+                    inc bl
+                    cmp al, bl
+                    jnl return 
+
+                    inc snake_length
+                    
+                    ;mov ax, 120Ch 
+                    ;mov food_pos, ax
+                    call random
+                    ;call rng ; for some reason, collision cannot be detected when a new random coord is given. only works on non-overflowed values
     return: 
         ret
         
