@@ -15,7 +15,5 @@
 <ul>
   <h2>TODOs/bugs</h2>
   <li>flickering graphics on lower cpu cycles which becomes more noticeable as snake gets longer </li>
-  <li>check for collision with self</li>
-  <li>food collision is not detected in seemingly random instances</li>
-  <li>food "rng" is not really random; sometimes food spawns on on snake's body </li>
+  <li>food collision does not work on randomly generated food_pos, possibly due to overflow; only works on static coordinates</li>
 </ul>

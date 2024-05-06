@@ -1,8 +1,11 @@
-; TODO: fix issue wherein overflows on both x and y axis mess up coordinates
+; ISSUE: food collision does not work on randomly generated food_pos, possibly due to overflow
+;        however, it works on static coordinates
+; TODO: fix rng  
+
 .model small
 .stack 100h
 .data
-    snake_pos dw 960 dup (?) ; higher byte = x coord | lower byte = y coord    ; dosbox 27hx18h adjusted for 8x8 sprites  
+    snake_pos dw 960 dup (?) ; higher byte = x coord | lower byte = y coord    ; dosbox screen is 27hx18h adjusted for 8x8 sprites  
     snake_length dw 0
     key_pressed db 'd'
     prev_key db ?
@@ -15,7 +18,7 @@
     
     random_seed dw 0
 
-    difficulty db 0 ; change difficulty here
+    difficulty db 2 ; change difficulty here
 
     med_pos dw 0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h                  
     hard_pos dw 0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h,0110h,0210h,0310h,0410h,0510h,0610h,260Ah,250Ah,240Ah,230Ah,220Ah,210Ah
@@ -144,17 +147,6 @@
         ret
 
     input:
-        mov ah, 02h
-        mov bx, 0
-        mov dx, 0502h
-        int 10h 
-
-        mov ah, 09h
-        mov al, key_pressed
-        mov bx, 000Fh
-        mov cx, 1
-        int 10h
-
         mov ah, 01h ; get user input
         int 16h
 
@@ -611,9 +603,9 @@
 
                     inc snake_length
                     
-                    ;mov ax, 120Ch 
-                    ;mov food_pos, ax
-                    call random
+                    mov ax, 120Ch 
+                    mov food_pos, ax
+                    ;call random
                     ;call rng ; for some reason, collision cannot be detected when a new random coord is given. only works on non-overflowed values
             wall_collision:
                 mov ax, @data
