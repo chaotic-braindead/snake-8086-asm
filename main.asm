@@ -20,8 +20,8 @@
 
     difficulty db 2 ; change difficulty here | 0 = easy, 1 = med, 2 = hard
 
-    med_pos dw 0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h                  
-    hard_pos dw 0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h,0110h,0210h,0310h,0410h,0510h,0610h,260Ah,250Ah,240Ah,230Ah,220Ah,210Ah
+    med_pos dw 12,0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h                  
+    hard_pos dw 24,0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h,0110h,0210h,0310h,0410h,0510h,0610h,260Ah,250Ah,240Ah,230Ah,220Ah,210Ah
 
     strScore db 'Score:'
     strScore_s equ $-strScore
@@ -155,7 +155,6 @@
         mov ah, 00h
         int 16h
         
-        
         cmp al, 27 ; check if escape key
         jne update ; update key_pressed if not esc
         mov ah, 4ch
@@ -213,7 +212,6 @@
         head_right:
             lea si, snake_head_right
         
-
         draw_head:
             call draw_img
         
@@ -302,15 +300,14 @@
             ret
         draw_med:
             lea si, med_pos
-            mov bp, 12
-            jmp draw_wall 
+            jmp init_len 
         draw_hard:
             lea si, hard_pos
-            mov bp, 24
-
+        init_len:
+            mov bp, word ptr [si]
         draw_wall: 
-            mov dx, word ptr [si]
             add si, 2
+            mov dx, word ptr [si]
             push si
             call calculate_pos 
             mov ax, @code 
@@ -348,9 +345,9 @@
             push di
                 mov ch, 8
         x_axis:
-            mov al, byte ptr [ds:si]
-            xor al, byte ptr [es:di]
-            mov byte ptr [es:di], al
+            mov al, byte ptr ds:[si]
+            xor al, byte ptr es:[di]
+            mov byte ptr es:[di], al
             inc si
             inc di
             dec ch
@@ -401,14 +398,14 @@
         and al,00001111b	;Convert 2nd seed low nibble to Lookup
         
         mov si,ax
-        mov dh,[es:bx+si]		;Get Byte from LUT 1
+        mov dh,es:[bx+si]		;Get Byte from LUT 1
         
         call DoRandomByte1	
         and al,00001111b		;Convert random number from 1st 
         
         lea bx, random_table2	;geneerator to Lookup
         mov si,ax
-        mov al,[es:bx+si]		;Get Byte from LUT2
+        mov al,es:[bx+si]		;Get Byte from LUT2
         
         xor al,dh				;Xor 1st lookup
         ret
@@ -623,14 +620,11 @@
                     ret
                 collision_med:
                     lea si, med_pos
-                    mov bp, 12
                     jmp init
                 collision_hard: 
                     lea si, hard_pos 
-                    mov bp, 24
-                
                 init:
-                    sub si, 2
+                    mov bp, word ptr [si]
                 check_wall_col:
                     cmp bp, 0
                     jl return
@@ -660,9 +654,7 @@
                     int 21h     
     return: 
         ret
-        
-    
-
+    ; bitmaps
     snake_head_up: 
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
         DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h     
