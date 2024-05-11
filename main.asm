@@ -1,6 +1,7 @@
 ; ISSUE: food collision does not work on randomly generated food_pos, possibly due to overflow
 ;        however, it works on static coordinates
 ; TODO: fix rng  
+;       implement harley's file/io leaderboard
 
 .model small
 .stack 100h
@@ -394,75 +395,90 @@
         mov cx, strLeadPage_l
         lea bp, strLeadPage
         call str_out
+        
+    mov ax, @data
+    mov ds, ax
+    mov ax, 3d02h
+    lea dx, filename
+    int 21h
+    mov handle, ax
+    ;seek to start of file
+    mov ax, 4200h
+    mov bx, handle
+    mov cx, 0
+    mov dx, 0
+    int 21h
 
-        mov ax, 3d02h
-        lea dx, filename
-        int 21h
-        mov handle, ax
-        ;seek to start of file
-        mov ax, 4200h
-        mov bx, handle
-        mov cx, 0
-        mov dx, 0
-        int 21h
+    ;read from file
+    mov ah, 3fh
+    mov bx, handle
+    mov cx, 1fh
+    lea dx, scores
+    int 21h
 
-        ;read from file
-        mov ah, 3fh
-        mov bx, handle
-        mov cx, 1fh
-        lea dx, scores
-        int 21h
+    lea si, scores
+    mov ch, byte ptr [si]
+    ;ch = number of records
+    inc si
+    iter_scores:
+        lea di, strbuf
+        mov cl, 04h
+        ldbuf:
+            mov dl, byte ptr [si]
+            mov byte ptr [di], dl
+            inc di
+            inc si
+            dec cl
+            jnz ldbuf
 
-        lea si, scores
-        mov ch, byte ptr [si]
-        ;ch = number of records
-        inc si
-        iter_scores:
-            lea di, strbuf
-            mov cl, 04h
-            ldbuf:
-                mov dl, byte ptr [si]
-                mov byte ptr [di], dl
-                inc di
-                inc si
-                dec cl
-                jnz ldbuf
-            lea dx, ldbuf
-            mov ah, 09h
-            int 21h
+        mov ah, 02h
+        mov dl, 0ah
+        int 21h 
+
+        push cx
+        mov cx, 16
+        printsp:
             mov ah, 02h
             mov dl, 20h
-            int 21h
-            
-            mov ah, byte ptr [si]
-            inc si
-            mov al, byte ptr [si]
-            push cx
-            mov cx, 03h
-            divide_scores:         ; convert to decimal (thank u raffy)
-                xor dx, dx
-                mov bx, 0ah
-                div bx
-                push dx
-            loop divide_scores
-            mov cx, 03h
-            printnum:
-                pop dx
-                add dx, '0'
-                mov ah, 02 
-                int 21h
-            loop printnum
-            inc si
-            pop cx
-            dec ch
-            jnz iter_scores
-
-        ;close file
-        mov ah, 3eh
-        mov bx, handle
+            int 21h 
+        loop printsp
+    
+        pop cx
+        lea dx, strbuf
+        mov ah, 09h
         int 21h
 
-       ; mov ah, 4ch
+        mov ah, 02h
+        mov dl, 20h
+        int 21h
+        
+        mov ah, byte ptr [si]
+        inc si
+        mov al, byte ptr [si]
+        push cx
+        mov cx, 03h
+        int_score:         ; convert to decimal (thank u raffy)
+            xor dx, dx
+            mov bx, 0ah
+            div bx
+            push dx
+        loop int_score
+        mov cx, 03h
+        printnum:
+            pop dx
+            add dx, '0'
+            mov ah, 02 
+            int 21h
+        loop printnum
+        inc si
+        pop cx
+        dec ch
+        mov ah, 02h
+        mov dl, 10
+        int 21h
+    jnz iter_scores
+
+        ;mov ah, 4ch
         ;int 21h
 
         back_to_menu:
@@ -1043,46 +1059,6 @@
             mov ch, byte ptr [si]
             inc ch
             mov byte ptr[si], ch
-            
-            ; ;SORTING
-            ; mov dh, ch
-            ; ;ch = outer loop counter
-            ; ;dh = inner loop counter
-            ; outsort:
-            ;     lea si, scores ;reset pointers
-            ;     lea di, scores
-            ;     add si, 06h
-            ;     add di, 06h
-            ;     push cx
-            ;     mov ch, dh
-            ;     insort:
-            ;         mov di, si
-            ;         mov al, byte ptr [si]
-            ;         mov ah, byte ptr [si-1]
-            ;         mov bl, byte ptr [si+6]
-            ;         mov bh, byte ptr [si+5]
-            ;         cmp ax, bx
-            ;         jge noswap
-            ;         add di, 01h
-            ;         sub si, 05h
-            ;         mov dl, 06h
-            ;         swapscore:
-            ;             mov bh, byte ptr [di]
-            ;             mov bl, byte ptr [si]
-            ;             mov byte ptr [di], bl
-            ;             mov byte ptr [si], bh
-            ;             inc si
-            ;             inc di
-            ;             dec dl
-            ;             jnz swapscore
-            ;         noswap:
-            ;         add si, 06h
-            ;         dec ch 
-            ;     jnz insort
-            ;     pop cx
-            ;     dec dh
-            ;     dec ch
-            ; jnz outsort
 
             ;cap score size for storage
             lea si, scores
@@ -1112,8 +1088,6 @@
 
             call game_over_page
             ret
-            ;mov ah, 4ch
-            ;int 21h
         collision:
             mov ax, @data
             mov ds, ax 
