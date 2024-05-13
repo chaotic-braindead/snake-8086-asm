@@ -16,6 +16,7 @@
     border_pos dw 28h+28h+18h+18h dup (?)
     random_table1 db 0Ah,9Fh,0F0h,1Bh,69h,3Dh,0E8h,52h,0C6h,41h,0B7h,74h,23h,0ACh,8Eh,0D5h
     random_table2 db 9Ch,0EEh,0B5h,0CAh,0AFh,0F0h,0DBh,69h,3Dh,58h,22h,06h,41h,17h,74h,83h
+    paused db 0
     
     random_seed dw 0
 
@@ -89,6 +90,12 @@
     ;invalid choice
     strInvalid db "Invalid choice!",13,10
     strInvalid_l equ $ - strInvalid
+
+    strUname db "Enter your name:",13,10
+    strUname_l equ $-strUname
+
+    strCont db "Press any key to continue...",13,10
+    strCont_l equ $-strCont
 
     ;player input
     charResp db ?
@@ -297,11 +304,6 @@
             mov es, ax
             call cls
 
-            
-            ; reset snake position
-            ;mov snake_length, 0
-            
-
             ;write game over prompt
             mov dh, 7 ;row
             mov dl, 14 ;coloumn
@@ -437,12 +439,8 @@
 
         push cx
         mov cx, 16
-        printsp:
-            mov ah, 02h
-            mov dl, 20h
-            int 21h 
-        loop printsp
-    
+        call printsp 
+       
         pop cx
         lea dx, strbuf
         mov ah, 09h
@@ -515,6 +513,16 @@
         mov word ptr [si], 0A0Ah ;;   
         mov byte ptr key_pressed, 'd'
         mov byte ptr prev_key, 's'
+        mov bp, snake_length 
+        clear_snake:
+            cmp bp, 0
+            je start
+            add si, 2
+            dec bp
+            mov word ptr [si], 0 
+            jmp clear_snake
+        
+        start:
         mov snake_length, 0 ; reset score for next game loop
         game_loop:
             call write_score
@@ -527,6 +535,24 @@
             mov ah, 4ch
             int 21h
     main_loop endp
+
+    printsp proc
+        space: 
+            mov ah, 02h
+            mov dl, 20h
+            int 21h 
+        loop space
+        ret
+    printsp endp
+
+    printnl proc 
+        nl:
+            mov ah, 02h
+            mov dl, 10
+            int 21h 
+        loop nl 
+        ret
+    printnl endp
 
     cls proc ; clears the screen
         mov ah, 07h          ; scroll down function
@@ -628,8 +654,15 @@
         
         cmp al, 27 ; check if escape key
         jne update ; update key_pressed if not esc
-        mov ah, 4ch
-        int 21h
+        cmp paused, 0
+        je pause
+        mov paused, 0
+        jmp back
+        pause:
+            mov paused, 1
+        jmp back
+        ;mov ah, 4ch
+        ;int 21h
 
         update:
             mov ah, key_pressed
@@ -938,6 +971,10 @@
     move proc
         mov ax, @data
         mov ds, ax
+        cmp paused, 1
+        jne time 
+        ret 
+        time:
         mov ah, 2ch ; get system time
         int 21h
         cmp dl, time_now
@@ -1011,9 +1048,103 @@
             mov key_pressed, ah
             jmp check_key
         stop:
+            call cls
+
             mov ax, @data
             mov ds, ax
-            ;open file
+            mov es, ax 
+
+            lea bp, strUname
+            mov cx, strUname_l
+            mov bl, 0Fh
+            mov dh, 8
+            mov dl, 12
+            call str_out
+            
+            mov cx, 3
+            mov bp, 0
+            underscore:
+                mov ah, 2
+                mov dh, 10
+                mov dl, 18
+                add dx, bp 
+                inc bp
+                mov bh, 0
+                int 10h
+
+                mov ax, 092dh
+                mov bl, 0eh
+                mov bh, 0
+                push cx
+                mov cx, 1
+                int 10h
+                pop cx
+            loop underscore
+            
+            lea si, uname 
+            mov cx, 3
+            mov bp, 0
+            get_uname:
+                mov ah, 7
+                int 21h
+               
+                mov ah, 2
+                mov dh, 10
+                mov dl, 18
+                add dx, bp 
+                inc bp
+                mov bh, 0
+                int 10h
+
+                cmp al, 8
+                jne printchar
+
+                mov ah, 2
+                dec dx 
+                dec bp
+                dec bp
+                dec si
+                mov bh, 0
+                int 10h
+
+                mov ax, 0a2dh
+                mov bh, 0
+                mov cx, 1
+                int 10h 
+
+                jmp get_uname
+
+                printchar:
+                    mov ah, 0ah
+                    mov bh, 0
+                    mov bl, 0eh
+                    push cx
+                    mov cx, 1
+                    int 10h
+                    pop cx
+                
+                mov byte ptr [si], al
+                inc si
+            cmp bp, 3
+            je confirm_uname
+            jmp get_uname
+            
+            confirm_uname:
+                lea bp, strCont
+                mov cx, strCont_l
+                mov bl, 0Fh
+                mov dh, 14
+                mov dl, 7
+                call str_out
+
+                mov ah, 7
+                int 21h
+                mov byte ptr [si], '$'
+                mov ax, snake_length
+                lea si, iscore 
+                mov byte ptr [si+1], al
+             
+            ;open file  
             mov ax, 3d02h
             lea dx, filename
             int 21h
@@ -1050,7 +1181,9 @@
                     inc si
                     inc di
                     loop inpname
-                mov dx, snake_length
+                lea si, iscore
+                mov dh, byte ptr [si]
+                mov dl, byte ptr [si+1]
                 mov byte ptr [di], dh
                 mov byte ptr [di+1], dl
             
@@ -1058,7 +1191,47 @@
             lea si, scores
             mov ch, byte ptr [si]
             inc ch
-            mov byte ptr[si], ch
+            mov byte ptr [si], ch
+            
+            ;SORTING
+            mov dh, ch
+            ;ch = outer loop counter
+            ;dh = inner loop counter
+            outsort:
+                lea si, scores ;reset pointers
+                lea di, scores
+                add si, 06h
+                add di, 06h
+                push cx
+                mov ch, dh
+                insort:
+                    mov di, si
+                    mov al, byte ptr [si]
+                    mov ah, byte ptr [si-1]
+                    mov bl, byte ptr [si+6]
+                    mov bh, byte ptr [si+5]
+                    cmp ax, bx
+                    jge noswap
+                    add di, 01h
+                    sub si, 05h
+                    mov dl, 06h
+                    swapscore:
+                        mov bh, byte ptr [di]
+                        mov bl, byte ptr [si]
+                        mov byte ptr [di], bl
+                        mov byte ptr [si], bh
+                        inc si
+                        inc di
+                        dec dl
+                        jnz swapscore
+                    noswap:
+                    add si, 06h
+                    dec ch 
+                jnz insort
+                pop cx
+                dec dh
+                dec ch
+            jnz outsort
 
             ;cap score size for storage
             lea si, scores
@@ -1201,7 +1374,7 @@
                     cmp al, bl
                     jnl check_wall_col
 
-                    call game_over_page 
+                    jmp stop
                     ;mov ah, 4ch
                     ;int 21h     
     return: 
