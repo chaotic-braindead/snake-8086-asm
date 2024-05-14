@@ -1,8 +1,3 @@
-; ISSUE: food collision does not work on randomly generated food_pos, possibly due to overflow
-;        however, it works on static coordinates
-; TODO: fix rng  
-;       implement harley's file/io leaderboard
-
 .model small
 .stack 100h
 .data
@@ -178,7 +173,7 @@
         
         ;write title
         mov dh, 20 ;row
-        mov dl, 12 ;coloumn
+        mov dl, 12 ;column
         mov bl, 0Ch ;color
         mov cx, strTitle_l
         lea bp, strTitle
@@ -245,7 +240,7 @@
             call cls
             ;write diff prompt
             mov dh, 7 ;row
-            mov dl, 10 ;coloumn
+            mov dl, 10 ;column
             mov bl, 0Ch ; red
             mov cx, strDiffSelec_l
             lea bp, strDiffSelec
@@ -306,7 +301,7 @@
 
             ;write game over prompt
             mov dh, 7 ;row
-            mov dl, 14 ;coloumn
+            mov dl, 14 ;column
             mov bl, 0Ch ;color
             mov cx, strGameOver_l
             lea bp, strGameOver
@@ -499,7 +494,7 @@
         ;write leaderboard prompt
         call cls
         mov dh, 7 ;row
-        mov dl, 14 ;coloumn
+        mov dl, 14 ;column
         mov bl, 0Eh ;color
         mov cx, strMechMsg_l
         lea bp, strMechMsg
@@ -508,9 +503,9 @@
         jmp back_to_menu
 
     main_loop proc
-        ;call random
+        call rng
         lea si, snake_pos
-        mov word ptr [si], 0A0Ah ;;   
+        mov word ptr [si], 0A0Ah ; snake's initial position 
         mov byte ptr key_pressed, 'd'
         mov byte ptr prev_key, 's'
         mov bp, snake_length 
@@ -582,7 +577,7 @@
     InvalidMsg proc
         call cls
         mov dh, 13 ;row
-        mov dl, 14 ;coloumn
+        mov dl, 14 ;column
         mov bl, 0Ah ;color
         mov cx, strInvalid_l
         lea bp, strInvalid
@@ -661,8 +656,6 @@
         pause:
             mov paused, 1
         jmp back
-        ;mov ah, 4ch
-        ;int 21h
 
         update:
             mov ah, key_pressed
@@ -674,7 +667,7 @@
     draw proc
         mov ax, @data
         mov ds, ax 
-        lea si, snake_pos;;
+        lea si, snake_pos
         mov dx, word ptr [si]
         call calculate_pos
 
@@ -843,8 +836,8 @@
         ret
 
     draw_img:   ; args: si = bitmap addr
-        mov ax, 0A000h ;; 
-        mov es, ax     ;;
+        mov ax, 0A000h
+        mov es, ax   
         mov cl, 8
         y_axis:
             push di
@@ -865,107 +858,89 @@
         ret
     draw endp 
 
-    random proc
-        push ds
-            mov ax, @data
-            mov ds, ax
-            mov bh,16
-            mov bl,160-16
-            call dorangedrandom	
-            mov dh, al
-            mov bh,16
-            mov bl,200-16
-            call dorangedrandom	
-            mov dl, al
-            mov food_pos, dx 
-            
-        pop ds
-        ret		
-    random endp
-
-    DoRandomByte1:
-        mov al,cl			;Get 1st seed
-    DoRandomByte1b:
-        ror al,1			;Rotate Right
-        ror al,1
-        xor al,cl			;Xor 1st Seed
-        ror al,1
-        ror al,1			;Rotate Right
-        xor al,ch			;Xor 2nd Seed
-        ror al,1			;Rotate Right
-        xor al,10011101b	;Xor Constant
-        xor al,cl			;Xor 1st seed
-        ret
-
-    DoRandomByte2:
-        lea bx, random_table1
-        mov ah,0
-        mov al,ch		
-        xor al,00001011b
-        and al,00001111b	;Convert 2nd seed low nibble to Lookup
-        
-        mov si,ax
-        mov dh,es:[bx+si]		;Get Byte from LUT 1
-        
-        call DoRandomByte1	
-        and al,00001111b		;Convert random number from 1st 
-        
-        lea bx, random_table2	;geneerator to Lookup
-        mov si,ax
-        mov al,es:[bx+si]		;Get Byte from LUT2
-        
-        xor al,dh				;Xor 1st lookup
-        ret
-        
-        
-    DoRandom:			;RND outputs to A (no input)
-        push bx
-        push cx
-        push dx
-            mov cx, random_seed    ;Get and update
-            inc cx							  	  ;Random Seed
-            mov random_seed,cx
-            call DoRandomWord
-            mov al,dl
-            xor al,dh
-        pop dx
-        pop cx
-        pop bx
-        ret
-        
-    DoRandomWord:		;Return Random pair in HL from Seed BC
-        call DoRandomByte1		;Get 1st byte
-        mov dh,al
-        push dx
-        push cx
-        push bx
-            call DoRandomByte2	;Get 2nd byte
-        pop bx
-        pop cx
-        pop dx
-        mov dl,al
-        inc cx
-        ret	
-        
-        
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-    DoRangedRandom: 		;Return a value between B and C
-        call DoRandom
-        cmp AL,BH
-        jc DoRangedRandom
-        cmp AL,BL
-        jnc DoRangedRandom
-        ret
-	
     rng proc       
         mov ax, @data
         mov ds, ax
-        mov ax, 1839h
-        mul food_pos
-        add ax, 13849
-        mov food_pos, ax
-        ret
+    randstart:
+        mov ah, 00h
+        int 1ah 
+        
+        mov ax, dx 
+        xor dx, dx 
+        mov cx, 15h ; make sure y coord does not go out of bounds
+        div cx 
+
+        inc dl 
+        mov bl, dl ; y coord
+        
+        mov ah, 00h
+        int 1ah
+        
+        mov ax, dx 
+        xor dx, dx 
+        mov cx, 25h ; make sure x coord does not go out of bounds
+        div cx 
+        
+        inc dl
+        mov bh, dl  ; x coord
+        mov food_pos, bx
+
+        lea si, border_pos
+        mov bp, 0
+        find_border:
+            cmp bp, 28h+28h+18h+18h
+            jg cont
+            mov ax, word ptr [si]
+            mov bx, food_pos
+            cmp ax, bx 
+            je randstart    ; generate another coord if food_pos is already occupied by a wall
+            inc bp 
+            add si, 2
+            jmp find_border
+
+        cont:
+            cmp difficulty, 0
+            je snake_col
+            cmp difficulty, 1
+            je ldmedwall
+            cmp difficulty, 2
+            je ldhardwall            
+
+            ldmedwall:
+                lea si, med_pos 
+                jmp find_wall 
+            ldhardwall:
+                lea si, hard_pos 
+        
+        mov bp, word ptr [si]
+        find_wall:
+            cmp bp, 0
+            je snake_col
+            add si, 2
+            dec bp 
+            mov ax, word ptr [si]
+            mov bx, food_pos
+            cmp ax, bx 
+            je randstart    ; generate another coord if food_pos is already occupied by a wall
+            jmp find_wall
+        snake_col:
+            lea si, snake_pos 
+            mov bp, snake_length 
+            snake_loop:
+                cmp bp, 0
+                je rngdone
+                dec bp
+                mov ax, word ptr [si]
+                mov bx, food_pos 
+                cmp ax, bx 
+                je genagain ; generate another coord if food_pos is already occupied by snake
+                add si, 2
+                jmp snake_loop
+        
+        genagain: 
+            call rng
+        rngdone:
+            ret
     rng endp 
 
     move proc
@@ -1326,8 +1301,7 @@
                     
                     mov ax, 120Ch 
                     mov food_pos, ax
-                    ;call random
-                    ;call rng ; for some reason, collision cannot be detected when a new random coord is given. only works on non-overflowed values
+                    call rng 
             wall_collision:
                 mov ax, @data
                 mov ds, ax 
@@ -1374,12 +1348,11 @@
                     cmp al, bl
                     jnl check_wall_col
 
-                    jmp stop
-                    ;mov ah, 4ch
-                    ;int 21h     
+                    jmp stop     
     return: 
         ret
     move endp
+
     ; bitmaps
     snake_head_up: 
         DB 00h,00h,00h,00h,00h,00h,00h,00h     
