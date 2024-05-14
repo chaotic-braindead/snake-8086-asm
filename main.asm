@@ -9,11 +9,7 @@
     food_pos dw 0A0Ah
     temp_pos dw ?
     border_pos dw 28h+28h+18h+18h dup (?)
-    random_table1 db 0Ah,9Fh,0F0h,1Bh,69h,3Dh,0E8h,52h,0C6h,41h,0B7h,74h,23h,0ACh,8Eh,0D5h
-    random_table2 db 9Ch,0EEh,0B5h,0CAh,0AFh,0F0h,0DBh,69h,3Dh,58h,22h,06h,41h,17h,74h,83h
     paused db 0
-    
-    random_seed dw 0
 
     difficulty db ?  ; change difficulty here | 0 = easy, 1 = med, 2 = hard
 
