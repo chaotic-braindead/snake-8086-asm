@@ -904,10 +904,10 @@
 
             ldmedwall:
                 lea si, med_pos 
-                jmp find_wall 
+                jmp init_wall 
             ldhardwall:
                 lea si, hard_pos 
-        
+        init_wall:
         mov bp, word ptr [si]
         find_wall:
             cmp bp, 0
@@ -952,6 +952,27 @@
         je move     ; keep checking until we have a different time
         mov time_now, dl
         
+        cmp difficulty, 0 
+        je easydelay
+        cmp difficulty, 1
+        je meddelay
+        cmp difficulty, 2
+        je harddelay 
+        
+        easydelay: ; 150000 ms (249f0h)
+            mov cx, 2
+            mov dx, 049f0h
+            jmp calldelay
+        meddelay:  ; 125000 ms (1e848h)
+            mov cx, 1
+            mov dx, 0e848h
+            jmp calldelay
+        harddelay: ; 100000 ms (186a0h)
+            mov cx, 1
+            mov dx, 86a0h
+        calldelay:
+            call delay
+
         lea si, snake_pos
         mov dx, word ptr [si]
         mov temp_pos, dx
@@ -1348,6 +1369,15 @@
     return: 
         ret
     move endp
+
+;DELAY 125000 (1e848h) ; args: cx dx = time in ms
+delay proc   
+  ;mov cx, 1     ;HIGH WORD.
+  ;mov dx, 0e848h ;LOW WORD.
+  mov ah, 86h    ;WAIT.
+  int 15h
+  ret
+delay endp   
 
     ; bitmaps
     snake_head_up: 
