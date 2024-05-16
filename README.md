@@ -3,7 +3,7 @@
 <p>Snake game written in 8086 assembly</p>
 <p align="center">
   <img style="width:500px" src="https://i.imgur.com/9aGwXoz.gif" alt="snek demo">
-  <ul>
+  <ul align="center">
     <li>
       <h2>Leaderboard</h2>
       <img style="width:500px" src="https://i.imgur.com/XKEFgcs.png" alt="leaderboard">
@@ -23,7 +23,6 @@
       <img style="width:500px" src="https://i.imgur.com/vl52k5p.png" alt="hard1">
     </li>
   </ul>
-
 </p>
 <ul>
   <h2>NOTES</h2>
