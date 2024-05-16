@@ -90,8 +90,133 @@
     strMenu_l equ $ - strMenu 
 
     ;mechanics
-    strMechMsg db "HOW TO PLAY",13,10
-    strMechMsg_l equ $ - strMechMsg
+    strMechTitleLbl db "MECHANICS",13,10
+    strMechTitleLbl_l equ $ - strMechTitleLbl
+
+    strMechGoBack db "[B] GO BACK",13,10
+    strMechGoBack_l equ $ - strMechGoBack
+
+    ;[1]-mechanics     HOW TO MOVE?
+    strMechNavi1 db "   1 OF 7  >",13,10
+    strMechNavi1_l equ $ - strMechNavi1
+
+    strMechTitle1 db "HOW TO MOVE?",13,10
+    strMechTitle1_l equ $ - strMechTitle1
+
+    strMechInstructions1 db "USE W,A,S,D TO MOVE",13,10
+    strMechInstructions1_l equ $ - strMechInstructions1
+
+    ;[2]-mechanics     HOW TO STAY ALIVE?
+    strMechNavi2 db "<  2 OF 7  >",13,10
+    strMechNavi2_l equ $ - strMechNavi2
+
+    strMechTitle2 db "HOW TO STAY ALIVE?",13,10
+    strMechTitle2_l equ $ - strMechTitle2
+
+    strMechInstructions2_1 db "DO NOT HIT WALLS &",13,10
+    strMechInstructions2_1_l equ $ - strMechInstructions2_1
+
+    strMechInstructions2_2 db "DO NOT EAT YOURSELF",13,10
+    strMechInstructions2_2_l equ $ - strMechInstructions2_2
+
+
+    ;[3]-mechanics     WHAT'S THE GOAL?
+    strMechNavi3 db "<  3 OF 7  >",13,10
+    strMechNavi3_l equ $ - strMechNavi3
+
+    strMechTitle3 db "WHAT'S THE GOAL?",13,10
+    strMechTitle3_l equ $ - strMechTitle3
+
+    strMechInstructions3_1 db "COLLECT MANY HEALTHY APPLES",13,10
+    strMechInstructions3_1_l equ $ - strMechInstructions3_1
+
+    strMechInstructions3_2 db "TO MAKE YOUR SNEK LONGER",13,10
+    strMechInstructions3_2_l equ $ - strMechInstructions3_2
+
+    strMechInstructions3_3 db "AND GET MORE POINTS!",13,10
+    strMechInstructions3_3_l equ $ - strMechInstructions3_3
+
+    ;[4]-mechanics     BEWARE!!!
+    strMechNavi4 db "<  4 OF 7  >",13,10
+    strMechNavi4_l equ $ - strMechNavi4
+
+    strMechTitle4 db "BEWARE!!!",13,10
+    strMechTitle4_l equ $ - strMechTitle4
+
+    strMechInstructions4_1 db "DO NOT EAT ROTTEN APPLES",13,10
+    strMechInstructions4_1_l equ $ - strMechInstructions4_1
+
+    strMechInstructions4_2 db "THEY MAKE YOUR SNEK SMALLER",13,10
+    strMechInstructions4_2_l equ $ - strMechInstructions4_2
+
+    strMechInstructions4_3 db "AND DEDUCT POINTS!",13,10
+    strMechInstructions4_3_l equ $ - strMechInstructions4_3
+
+    ;[5]-mechanics     A SURPRISE!
+    strMechNavi5 db "<  5 OF 7  >",13,10
+    strMechNavi5_l equ $ - strMechNavi5
+
+    strMechTitle5 db "A SURPRISE!",13,10
+    strMechTitle5_l equ $ - strMechTitle5
+
+    strMechInstructions5_1 db "KEEP EATING HEALTHY APPLES &",13,10
+    strMechInstructions5_1_l equ $ - strMechInstructions5_1
+
+    strMechInstructions5_2 db "A SUPER APPLE WILL APPEAR!",13,10
+    strMechInstructions5_2_l equ $ - strMechInstructions5_2
+
+    strMechInstructions5_3 db "THEY ADD 3 BLOCKS TO YOUR SNEK!",13,10
+    strMechInstructions5_3_l equ $ - strMechInstructions5_3
+
+    ;[6]-mechanics     CHOOSE DIFFICULTY
+    strMechNavi6 db "<  6 OF 7  >",13,10
+    strMechNavi6_l equ $ - strMechNavi6
+
+    strMechTitle6 db "CHOOSE DIFFICULTY!",13,10
+    strMechTitle6_l equ $ - strMechTitle6
+
+    strMechInstructions6_1 db "SPEED AND ENVIRONMENT CHANGE",13,10
+    strMechInstructions6_1_l equ $ - strMechInstructions6_1
+
+    strMechInstructions6_2 db "BASED ON THE DIFFICULTY",13,10
+    strMechInstructions6_2_l equ $ - strMechInstructions6_2
+
+    strMechDiffLabels db "EASY          MEDIUM                HARD",13,10
+    strMechDiffLabels_l equ $ - strMechDiffLabels
+
+    strMechDiffTimeDelays db "0.15 SEC DELAY   0.125 SEC DELAY     0.1 SEC DELAY",13,10
+    strMechDiffTimeDelays_l equ $ - strMechDiffTimeDelays
+
+    ;[7]-mechanics     VIEW LEADERBOARDS
+    strMechNavi7 db "<  7 OF 7   ",13,10
+    strMechNavi7_l equ $ - strMechNavi7
+
+    strMechTitle7 db " VIEW LEADERBOARDS",13,10
+    strMechTitle7_l equ $ - strMechTitle7
+
+    strMechInstructions7_1 db "SAVE YOUR SCORE &",13,10
+    strMechInstructions7_1_l equ $ - strMechInstructions7_1
+
+    strMechInstructions7_2 db "SEE IF YOU REACHED TOP 5!",13,10
+    strMechInstructions7_2_l equ $ - strMechInstructions7_2
+
+    strMechLeaderboardsTitle db "LEADERBOARDS",13,10
+    strMechLeaderboardsTitle_l equ $ - strMechLeaderboardsTitle
+
+    strMechLeaderboardsPlyr1 db "RAF 099",13,10
+    strMechLeaderboardsPlyr1_l equ $ - strMechLeaderboardsPlyr1
+
+    strMechLeaderboardsPlyr2 db "HAR 098",13,10
+    strMechLeaderboardsPlyr2_l equ $ - strMechLeaderboardsPlyr2
+
+    strMechLeaderboardsPlyr3 db "ALX 097",13,10
+    strMechLeaderboardsPlyr3_l equ $ - strMechLeaderboardsPlyr3
+
+    strMechLeaderboardsPlyr4 db "PAO 096",13,10
+    strMechLeaderboardsPlyr4_l equ $ - strMechLeaderboardsPlyr4
+
+    strMechLeaderboardsPlyr5 db "MCH 095",13,10
+    strMechLeaderboardsPlyr5_l equ $ - strMechLeaderboardsPlyr5
 
     ;invalid choice
     strInvalid db "Invalid choice!",13,10
@@ -759,19 +884,475 @@
             call InvalidMsg
             jmp lead_page
 
-            lead_back: jmp menu_page
+            lead_back proc
+                jmp menu_page
+                ret
+            lead_back endp
             
     mech_page:
-        ;write leaderboard prompt
-        call cls
-        mov dh, 7 ;row
-        mov dl, 14 ;column
+        mov ch, 1
+        call navigate_mech_page
+
+    navigate_mech_page proc 
+        cmp ch, 1
+            je goto_mech_page_1
+        cmp ch, 2
+            je goto_mech_page_2
+        cmp ch, 3
+            je goto_mech_page_3
+        cmp ch, 4
+            je goto_mech_page_4
+        cmp ch, 5
+            je goto_mech_page_5
+        cmp ch, 6
+            je goto_mech_page_6
+        cmp ch, 7
+            je goto_mech_page_7
+
+        goto_mech_page_1:
+            call mech_page_1
+            jmp skip1
+
+        goto_mech_page_2:
+            call mech_page_2
+            jmp skip1
+
+        goto_mech_page_3:
+            call mech_page_3
+            jmp skip1
+
+        goto_mech_page_4:
+            call mech_page_4
+            jmp skip1
+
+        goto_mech_page_5:
+            call mech_page_5
+            jmp skip1
+
+        goto_mech_page_6:
+            call mech_page_6
+            jmp skip1
+        
+        goto_mech_page_7:
+            call mech_page_7
+
+        skip1: ret
+    navigate_mech_page endp
+
+    mech_print_page_defaults proc
+        ; write "MECHANICS" Title 
+        mov dh, 2 ;row
+        mov dl, 16 ;column
         mov bl, 0Eh ;color
-        mov cx, strMechMsg_l
-        lea bp, strMechMsg
+        mov cx, strMechTitleLbl_l
+        lea bp, strMechTitleLbl
         call str_out
 
-        jmp back_to_menu
+        ; write "[B] BACK"
+        mov dh, 22 ;row
+        mov dl, 16 ;column
+        mov bl, 08h ;color
+        mov cx, strBack_l
+        lea bp, strBack
+        call str_out
+
+        ret
+    mech_print_page_defaults endp
+
+    mech_page_1 proc
+        mov ax, @data
+        mov es, ax
+        call cls
+        call mech_print_page_defaults
+
+        ; write "1 - HOW TO MOVE?"
+        mov dh, 4 ;row
+        mov dl, 14 ;column
+        mov bl, 0Bh ;color
+        mov cx, strMechTitle1_l
+        lea bp, strMechTitle1
+        call str_out
+
+        ; write "USE W,A,S,D TO MOVE"
+        mov dh, 18 ;row
+        mov dl, 11 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions1_l
+        lea bp, strMechInstructions1
+        call str_out
+
+        ; write "1 OF 7"
+        mov dh, 20 ;row
+        mov dl, 14 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechNavi1_l
+        lea bp, strMechNavi1
+        call str_out
+
+        mov ch, 1
+        call mech_get_resp
+        ret
+    mech_page_1 endp
+
+    mech_page_2 proc
+        mov ax, @data
+        mov es, ax
+        call cls
+        call mech_print_page_defaults
+
+        ; write "2 - HOW TO STAY ALIVE?"
+        mov dh, 4 ;row
+        mov dl, 11 ;column
+        mov bl, 0Bh ;color
+        mov cx, strMechTitle2_l
+        lea bp, strMechTitle2
+        call str_out
+
+        ; write "DO NOT HIT WALLS &"
+        mov dh, 17 ;row
+        mov dl, 11 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions2_1_l
+        lea bp, strMechInstructions2_1
+        call str_out
+
+        ; write "DO NOT EAT YOURSELF"
+        mov dh, 18 ;row
+        mov dl, 11 ;column
+        mov bl, 0Bh ;color
+        mov cx, strMechInstructions2_2_l
+        lea bp, strMechInstructions2_2
+        call str_out
+
+        ; write "2 OF 7"
+        mov dh, 20 ;row
+        mov dl, 14 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechNavi2_l
+        lea bp, strMechNavi2
+        call str_out
+
+        mov ch, 2
+        call mech_get_resp
+        ret
+    mech_page_2 endp
+
+    mech_page_3 proc
+        mov ax, @data
+        mov es, ax
+        call cls
+        call mech_print_page_defaults
+
+        ; write "3 - WHAT'S THE GOAL?"
+        mov dh, 4 ;row
+        mov dl, 12 ;column
+        mov bl, 0Bh ;color
+        mov cx, strMechTitle3_l
+        lea bp, strMechTitle3
+        call str_out
+
+        ; write "COLLECT MANY HEALTHY APPLES"
+        mov dh, 16 ;row
+        mov dl, 7 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions3_1_l
+        lea bp, strMechInstructions3_1
+        call str_out
+
+        ; write "TO MAKE YOUR SNEK LONGER"
+        mov dh, 17 ;row
+        mov dl, 8 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions3_2_l
+        lea bp, strMechInstructions3_2
+        call str_out
+
+        ; write "AND GET MORE POINTS!"
+        mov dh, 18 ;row
+        mov dl, 10 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechInstructions3_3_l
+        lea bp, strMechInstructions3_3
+        call str_out
+
+        ; write "3 OF 7"
+        mov dh, 20 ;row
+        mov dl, 14 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechNavi3_l
+        lea bp, strMechNavi3
+        call str_out
+
+        mov ch, 3
+        call mech_get_resp
+        ret
+    mech_page_3 endp
+
+    mech_page_4 proc
+        mov ax, @data
+        mov es, ax
+        call cls
+        call mech_print_page_defaults
+
+        ; write "4 - BEWARE!!!"
+        mov dh, 4 ;row
+        mov dl, 16 ;column
+        mov bl, 04h ;color
+        mov cx, strMechTitle4_l
+        lea bp, strMechTitle4
+        call str_out
+
+        ; write "DO NOT EAT ROTTEN APPLES"
+        mov dh, 16 ;row
+        mov dl, 8 ;column
+        mov bl, 04h ;color
+        mov cx, strMechInstructions4_1_l
+        lea bp, strMechInstructions4_1
+        call str_out
+
+        ; write "THEY MAKE YOUR SNEK SMALLER"
+        mov dh, 17 ;row
+        mov dl, 7 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions4_2_l
+        lea bp, strMechInstructions4_2
+        call str_out
+
+        ; write "AND DEDUCT POINTS!"
+        mov dh, 18 ;row
+        mov dl, 10 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions4_3_l
+        lea bp, strMechInstructions4_3
+        call str_out
+
+        ; write "4 OF 7"
+        mov dh, 20 ;row
+        mov dl, 14 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechNavi4_l
+        lea bp, strMechNavi4
+        call str_out
+
+        mov ch, 4
+        call mech_get_resp
+        ret
+    mech_page_4 endp
+
+    mech_page_5 proc
+        mov ax, @data
+        mov es, ax
+        call cls
+        call mech_print_page_defaults
+
+        ; write "5 - A SURPRISE!"
+        mov dh, 4 ;row
+        mov dl, 15 ;column
+        mov bl, 0Dh ;color
+        mov cx, strMechTitle5_l
+        lea bp, strMechTitle5
+        call str_out
+
+        ; write "KEEP EATING HEALTHY APPLES &"
+        mov dh, 16 ;row
+        mov dl, 6 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions5_1_l
+        lea bp, strMechInstructions5_1
+        call str_out
+
+        ; write "A SUPER APPLE WILL APPEAR!"
+        mov dh, 17 ;row
+        mov dl, 7 ;column
+        mov bl, 0Dh ;color
+        mov cx, strMechInstructions5_2_l
+        lea bp, strMechInstructions5_2
+        call str_out
+
+        ; write "EAT THIS AND ADD 3 BLOCKS TO YOUR SNEK!"
+        mov dh, 18 ;row
+        mov dl, 4 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions5_3_l
+        lea bp, strMechInstructions5_3
+        call str_out
+
+        ; write "5 OF 7"
+        mov dh, 20 ;row
+        mov dl, 14 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechNavi5_l
+        lea bp, strMechNavi5
+        call str_out
+
+        mov ch, 5
+        call mech_get_resp
+        ret
+    mech_page_5 endp
+    
+    mech_page_6 proc
+        mov ax, @data
+        mov es, ax
+        call cls
+        call mech_print_page_defaults
+
+        ; write "6 - CHOOSE DIFFICULTY"
+        mov dh, 4 ;row
+        mov dl, 11 ;column
+        mov bl, 0Bh ;color
+        mov cx, strMechTitle6_l
+        lea bp, strMechTitle6
+        call str_out
+
+        ; write "SPEED AND ENVIRONMENT CHANGE"
+        mov dh, 17 ;row
+        mov dl, 6 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechInstructions6_1_l
+        lea bp, strMechInstructions6_1
+        call str_out
+
+        ; write "BASED ON THE DIFFICULTY"
+        mov dh, 18 ;row
+        mov dl, 8 ;column
+        mov bl, 0Bh ;color
+        mov cx, strMechInstructions6_2_l
+        lea bp, strMechInstructions6_2
+        call str_out
+
+        ; write "6 OF 7"
+        mov dh, 20 ;row
+        mov dl, 14 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechNavi6_l
+        lea bp, strMechNavi6
+        call str_out
+
+        mov ch, 6
+        call mech_get_resp
+        ret
+    mech_page_6 endp
+
+    mech_page_7 proc
+        mov ax, @data
+        mov es, ax
+        call cls
+        call mech_print_page_defaults
+
+        ; write "7 - VIEW LEADERBOARDS"
+        mov dh, 4 ;row
+        mov dl, 11 ;column
+        mov bl, 0Bh ;color
+        mov cx, strMechTitle7_l
+        lea bp, strMechTitle7
+        call str_out
+
+        ; write "LEADERBOARDS"
+        mov dh, 7 ;row
+        mov dl, 14 ;column
+        mov bl, 0Ah ;color
+        mov cx, strMechLeaderboardsTitle_l
+        lea bp, strMechLeaderboardsTitle
+        call str_out
+
+        ; write "RAF 099"
+        mov dh, 9 ;row
+        mov dl, 16 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechLeaderboardsPlyr1_l
+        lea bp, strMechLeaderboardsPlyr1
+        call str_out
+
+        ; write "HAR 098"
+        mov dh, 10 ;row
+        mov dl, 16 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechLeaderboardsPlyr2_l
+        lea bp, strMechLeaderboardsPlyr2
+        call str_out
+
+        ; write "ALX 097"
+        mov dh, 11 ;row
+        mov dl, 16 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechLeaderboardsPlyr3_l
+        lea bp, strMechLeaderboardsPlyr3
+        call str_out
+
+        ; write "PAO 096"
+        mov dh, 12 ;row
+        mov dl, 16 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechLeaderboardsPlyr4_l
+        lea bp, strMechLeaderboardsPlyr4
+        call str_out
+
+        ; write "MCH 095"
+        mov dh, 13 ;row
+        mov dl, 16 ;column
+        mov bl, 0Fh ;color
+        mov cx, strMechLeaderboardsPlyr5_l
+        lea bp, strMechLeaderboardsPlyr5
+        call str_out
+
+        ; write "SAVE YOUR SCORE &"
+        mov dh, 17 ;row
+        mov dl, 11 ;column
+        mov bl, 0Bh ;color
+        mov cx, strMechInstructions7_1_l
+        lea bp, strMechInstructions7_1
+        call str_out
+
+        ; write "SEE IF YOU REACHED TOP 5!"
+        mov dh, 18 ;row
+        mov dl, 8 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechInstructions7_2_l
+        lea bp, strMechInstructions7_2
+        call str_out
+
+        ; write "7 OF 7"
+        mov dh, 20 ;row
+        mov dl, 14 ;column
+        mov bl, 0Eh ;color
+        mov cx, strMechNavi7_l
+        lea bp, strMechNavi7
+        call str_out
+
+        mov ch, 7
+        call mech_get_resp
+        ret
+    mech_page_7 endp
+
+    mech_get_resp proc
+        call resp
+        cmp al, 'a'
+            je mech_move_left
+        cmp al, 'd'
+            je mech_move_right
+        cmp al, 'b'
+            je goto_lead_back
+            jmp skip2 
+            goto_lead_back: call lead_back
+
+        mech_move_left:
+            cmp ch, 1
+                jne mech_move_left_dec
+                je skip2
+        mech_move_right:
+            cmp ch, 7
+                jne mech_move_right_inc
+                je skip2
+               
+        mech_move_left_dec:
+            dec ch 
+            jmp skip2
+
+        mech_move_right_inc: inc ch
+        
+        skip2: call navigate_mech_page
+        ret
+    mech_get_resp endp
 
     main_loop proc
         lea di, food_pos
