@@ -1,4 +1,18 @@
 <h1>20232 Group 1 Block 2 Sat 7am</h1>
+<h3>Leader: Tolentino, Michelle</h3>
+<h3>Members</h3>
+<ul>
+  <li>Alibin, Harley Usher</li>
+  <li>Bernabe, Aikera</li>
+  <li>Dionisio, Juan Paolo</li>
+  <li>Fanio, James Edward</li>
+  <li>Levita, Jehan Chaiz</li>
+  <li>Ong, Alexandra</li>
+  <li>Reyes, Sidney Latrell</li>
+  <li>Torres, Rafael Sebastian</li>
+  <li>Vargas, Ysabella Mae</li>
+</ul>
+<br/>
 <h1>Snek</h1>
 <p>Snake game written in 8086 assembly</p>
 <p align="center">
