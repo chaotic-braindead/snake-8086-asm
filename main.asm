@@ -947,8 +947,9 @@
             jmp draw_head
         head_right:
             lea si, snake_head_right
-        
         draw_head:
+            mov bh, 8
+            mov bl, 8
             call draw_img
         
         draw_body:      
@@ -974,6 +975,8 @@
                 push si
                 call calculate_pos
                 lea si, snake_body
+                mov bh, 8
+                mov bl, 8
                 call draw_img
                 pop si
                 mov ax, @data
@@ -1009,6 +1012,8 @@
             load_super: 
                 lea si, super_apple
             draw_apple:
+            mov bh, 8
+            mov bl, 8
             call draw_img
 
             mov ax, @data 
@@ -1019,6 +1024,8 @@
             mov ax, @code
             mov ds, ax
             lea si, rotten_apple
+            mov bh, 8
+            mov bl, 8
             call draw_img
         
         draw_border:
@@ -1034,6 +1041,8 @@
                 mov ax, @code 
                 mov ds, ax
                 lea si, wall
+                mov bh, 8
+                mov bl, 8
                 call draw_img 
                 pop si 
                 mov ax, @data
@@ -1052,8 +1061,6 @@
         cmp difficulty, 2
         je draw_hard
 
-        draw_easy: 
-            ret
         draw_med:
             lea si, med_pos
             jmp init_len 
@@ -1069,6 +1076,8 @@
             mov ax, @code 
             mov ds, ax
             lea si, wall
+            mov bh, 8
+            mov bl, 8
             call draw_img 
             pop si 
             mov ax, @data
@@ -1076,9 +1085,11 @@
             dec bp 
             cmp bp, 0
             jne draw_wall
-        ret
+        draw_easy:  
+            ret
+    draw endp
 
-    calculate_pos:  ; args: dx = coordinate | ret: di = coord in vram
+    calculate_pos proc ; args: dx = coordinate | ret: di = coord in vram
         mov ax, @code
         mov ds, ax
         push dx
@@ -1092,14 +1103,15 @@
             add di, ax
         pop dx 
         ret
+    calculate_pos endp
 
-    draw_img:   ; args: si = bitmap addr
+    draw_img proc   ; args: si = bitmap addr | bx = sprite dimensions    NOTE: call calculate_pos first
         mov ax, 0A000h
         mov es, ax   
-        mov cl, 8
+        mov cl, bl
         y_axis:
             push di
-                mov ch, 8
+                mov ch, bh
         x_axis:
             mov al, byte ptr ds:[si]
             xor al, byte ptr es:[di]
@@ -1110,11 +1122,10 @@
             jnz x_axis
         pop di
         add di, 320
-        inc bl
         dec cl 
         jnz y_axis
         ret
-    draw endp 
+    draw_img endp 
 
     rng proc       ; args : di = addr of variable  |  bp = seed
         mov ax, @data
@@ -1429,14 +1440,12 @@
                 lea di, snake_pos 
 
                 cmp difficulty, 0
-                je collision_easy 
+                je return 
                 cmp difficulty, 1
                 je collision_med
                 cmp difficulty, 2
                 je collision_hard 
 
-                collision_easy:
-                    ret
                 collision_med:
                     lea si, med_pos
                     jmp init
