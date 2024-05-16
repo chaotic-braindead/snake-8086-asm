@@ -890,10 +890,12 @@
             lead_back endp
             
     mech_page:
-        mov ch, 1
+        ; ch = page tracker
+        mov ch, 1  ; set ch to 1 when first calling mech_page
         call navigate_mech_page
 
-    navigate_mech_page proc 
+    navigate_mech_page proc
+        ; switch case to keep track of what page to display
         cmp ch, 1
             je goto_mech_page_1
         cmp ch, 2
@@ -939,6 +941,7 @@
         skip1: ret
     navigate_mech_page endp
 
+    ; writes default texts per mech_page
     mech_print_page_defaults proc
         ; write "MECHANICS" Title 
         mov dh, 2 ;row
@@ -1324,6 +1327,7 @@
         ret
     mech_page_7 endp
 
+    ; gets response per page display
     mech_get_resp proc
         call resp
         cmp al, 'a'
@@ -1335,10 +1339,13 @@
             jmp skip2 
             goto_lead_back: call lead_back
 
+        ; do not decrement if ch = 1
         mech_move_left:
             cmp ch, 1
                 jne mech_move_left_dec
                 je skip2
+        
+        ; do not increment if ch = 7
         mech_move_right:
             cmp ch, 7
                 jne mech_move_right_inc
@@ -2171,4 +2178,319 @@
         DB 06h,04h,0Eh,0Eh,0Eh,0Eh,04h,06h
         DB 04h,04h,06h,06h,06h,06h,04h,04h
         DB 06h,04h,06h,06h,06h,06h,04h,06h
+    
+    log_border_left:
+        ;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30
+        DB 00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h,00h,00h,0Ah,02h,02h,02h,02h,02h,02h,0Ah,00h ; 1
+        DB 00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h,00h,00h,0Eh,02h,02h,02h,02h,02h,02h,02h,0Ah,00h ; 2
+        DB 00h,06h,06h,0Dh,0Dh,06h,06h,06h,06h,02h,02h,06h,06h,06h,06h,06h,06h,00h,0Eh,0Eh,02h,02h,02h,00h,02h,02h,02h,02h,02h,00h ; 3
+        DB 00h,06h,06h,05h,05h,02h,06h,06h,06h,00h,02h,02h,06h,06h,06h,06h,00h,0Ah,0Ah,02h,02h,02h,00h,00h,02h,02h,02h,02h,02h,00h ; 4
+        DB 00h,06h,06h,06h,00h,02h,06h,06h,06h,00h,06h,06h,06h,06h,06h,0Eh,0Ah,0Ah,02h,02h,02h,00h,00h,02h,02h,02h,02h,02h,0Ah,00h ; 5
+        DB 00h,06h,06h,06h,00h,02h,06h,06h,06h,00h,06h,06h,0Eh,0Eh,0Eh,0Eh,02h,02h,02h,02h,00h,00h,02h,02h,02h,02h,02h,0Ah,00h,00h ; 6
+        DB 00h,06h,06h,06h,00h,02h,06h,06h,06h,06h,0Eh,0Eh,0Eh,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h ; 7
+        DB 00h,06h,06h,06h,00h,02h,06h,06h,0Eh,0Eh,0Eh,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,00h ; 8
+        DB 00h,06h,06h,06h,06h,06h,06h,0Ah,0Eh,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,00h ; 9
+        DB 00h,06h,06h,06h,06h,0Ah,0Ah,0Ah,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,00h,00h,00h ; 10
+        DB 00h,06h,06h,06h,0Ah,0Ah,02h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,00h,00h,00h,00h ; 11
+        DB 00h,06h,0Ah,0Ah,0Ah,02h,00h,00h,02h,02h,02h,02h,02h,02h,00h,00h,00h,02h,02h,02h,02h,00h,00h,00h,00h,00h,00h,00h,00h,00h ; 12
+        DB 00h,0Ah,0Ah,02h,02h,02h,00h,02h,02h,02h,02h,02h,02h,02h,00h,02h,02h,02h,02h,00h,00h,00h,00h,00h,06h,06h,00h,00h,00h,00h ; 13
+        DB 0Ah,0Ah,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,02h,02h,02h,00h,00h,00h,00h,00h,06h,06h,06h,00h,00h,00h,00h,00h ; 14
+        DB 02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,02h,02h,02h,02h,00h,00h,00h,00h,00h,06h,06h,06h,06h,06h,00h,00h,00h,00h,00h ; 15
+        DB 02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,00h,00h,00h,00h,00h ; 16
+        DB 02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,06h,00h,00h,00h,00h,00h ; 17
+        DB 02h,02h,00h,00h,00h,02h,02h,02h,02h,00h,00h,00h,00h,00h,00h,06h,06h,06h,06h,06h,00h,06h,06h,06h,06h,0Eh,00h,00h,00h,00h ; 18
+        DB 02h,00h,00h,02h,02h,02h,02h,00h,00h,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,00h,06h,06h,06h,00h,00h,06h,0Eh,0Eh,00h,00h ; 19
+        DB 02h,02h,02h,02h,02h,02h,00h,00h,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,06h,00h,06h,06h,06h,00h,0Eh,06h,06h,0Eh,00h,00h ; 20
+        DB 02h,02h,02h,00h,00h,00h,00h,00h,00h,06h,06h,06h,06h,02h,06h,06h,06h,06h,06h,00h,06h,06h,06h,00h,06h,06h,06h,0Eh,00h,00h ; 21
+        DB 00h,00h,00h,00h,00h,00h,00h,06h,06h,06h,06h,06h,06h,0Dh,0Dh,06h,06h,06h,06h,00h,06h,06h,06h,00h,06h,00h,00h,06h,00h,00h ; 22
+        DB 00h,06h,00h,00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,05h,05h,06h,06h,06h,06h,00h,00h,06h,06h,00h,06h,00h,00h,06h,00h,00h ; 23
+        DB 00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,02h,00h,06h,06h,06h,06h,06h,00h,06h,06h,00h,06h,00h,0Eh,00h,00h,00h ; 24
+        DB 00h,06h,06h,06h,06h,00h,06h,06h,06h,06h,06h,06h,06h,02h,00h,00h,06h,06h,06h,06h,06h,06h,06h,00h,06h,00h,06h,00h,00h,00h ; 25
+        DB 00h,06h,06h,06h,06h,00h,06h,06h,06h,06h,06h,06h,06h,02h,02h,00h,06h,06h,06h,06h,06h,06h,06h,00h,06h,00h,06h,00h,00h,00h ; 26
+        DB 00h,06h,06h,06h,06h,00h,02h,06h,06h,06h,06h,06h,06h,06h,02h,00h,06h,06h,06h,06h,06h,06h,06h,00h,06h,00h,06h,00h,00h,00h ; 27
+        DB 00h,06h,06h,06h,06h,00h,02h,06h,06h,06h,06h,06h,06h,06h,02h,00h,06h,06h,06h,06h,06h,06h,06h,00h,06h,00h,06h,00h,00h,00h ; 28
+        DB 0Ah,0Ah,06h,06h,06h,00h,06h,06h,00h,00h,06h,06h,06h,06h,06h,00h,06h,06h,06h,06h,06h,06h,06h,00h,06h,00h,00h,06h,00h,00h ; 29
+        DB 02h,0Ah,0Ah,0Ah,06h,06h,06h,06h,06h,00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h,06h,06h,00h,06h,00h,06h,06h,00h,00h ; 30
+        DB 02h,02h,02h,0Ah,0Ah,0Ah,06h,06h,06h,00h,00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h,06h,06h,00h,06h,06h,06h,0Eh,00h,00h ; 31
+        DB 02h,02h,02h,02h,0Ah,0Ah,0Ah,06h,06h,06h,00h,02h,06h,06h,06h,06h,06h,06h,06h,06h,00h,06h,06h,00h,00h,06h,0Eh,00h,00h,00h ; 32
+        DB 02h,02h,02h,02h,02h,02h,0Ah,0Ah,06h,06h,00h,02h,06h,06h,06h,06h,06h,06h,06h,06h,00h,06h,06h,06h,06h,0Eh,00h,00h,00h,00h ; 33
+        DB 02h,02h,02h,02h,02h,02h,02h,0Ah,0Ah,0Ah,0Ah,06h,06h,06h,06h,06h,06h,06h,06h,06h,0Dh,0Dh,06h,06h,06h,00h,00h,00h,00h,00h ; 34
+        DB 02h,02h,02h,02h,02h,02h,02h,02h,02h,0Ah,02h,06h,06h,06h,06h,06h,06h,06h,06h,06h,05h,05h,06h,06h,06h,00h,00h,00h,00h,00h ; 35
+        DB 02h,02h,02h,00h,00h,02h,02h,02h,02h,02h,02h,0Ah,0Eh,00h,06h,06h,06h,06h,06h,06h,00h,02h,06h,06h,06h,00h,00h,00h,00h,00h ; 36
+        DB 00h,02h,02h,02h,02h,00h,02h,02h,02h,02h,02h,02h,0Eh,0Eh,00h,00h,00h,06h,06h,06h,06h,02h,06h,06h,06h,00h,00h,00h,00h,00h ; 37
+        DB 00h,00h,02h,02h,02h,02h,00h,02h,02h,02h,02h,02h,02h,02h,0Eh,0Eh,0Eh,06h,06h,0Eh,06h,06h,06h,06h,06h,06h,00h,00h,00h,00h ; 38
+        DB 00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,02h,0Eh,0Eh,0Eh,0Eh,06h,06h,06h,06h,06h,06h,00h,00h,00h,00h ; 39
+        DB 00h,00h,00h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,02h,02h,02h,02h,0Ah,06h,06h,06h,06h,06h,00h,00h,00h,00h ; 40
+        DB 00h,06h,00h,00h,00h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,0Ah,0Ah,0Ah,06h,06h,06h,00h,00h,00h,00h ; 41
+        DB 00h,06h,06h,06h,06h,00h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,0Ah,0Ah,0Ah,00h,00h,00h,00h,00h ; 42
+        DB 00h,06h,06h,06h,06h,06h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,0Ah,0Ah,00h,00h,00h,00h ; 43
+        DB 00h,06h,06h,06h,06h,06h,06h,06h,00h,00h,00h,00h,00h,00h,02h,02h,02h,00h,02h,02h,02h,02h,02h,02h,02h,02h,0Ah,00h,00h,00h ; 44
+        DB 00h,06h,06h,06h,00h,06h,06h,06h,02h,00h,00h,00h,00h,00h,00h,02h,02h,02h,00h,00h,02h,02h,02h,00h,02h,02h,0Ah,00h,00h,00h ; 45
+        DB 00h,06h,06h,06h,00h,0Dh,0Dh,06h,06h,06h,06h,06h,06h,06h,00h,00h,02h,02h,00h,00h,02h,02h,02h,00h,00h,02h,02h,0Ah,00h,00h ; 46
+        DB 00h,06h,06h,06h,00h,05h,05h,06h,06h,06h,06h,06h,06h,06h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,00h,02h,0Ah,00h,00h ; 47
+        DB 00h,06h,06h,06h,00h,02h,02h,06h,06h,00h,00h,06h,06h,06h,06h,00h,00h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,0Ah,00h ; 48
+        DB 00h,06h,06h,06h,06h,06h,06h,06h,02h,06h,00h,00h,06h,06h,06h,06h,00h,00h,00h,00h,0Eh,02h,02h,02h,02h,02h,02h,02h,0Ah,00h ; 49
+        DB 00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h,00h,00h,0Ah,02h,02h,02h,02h,02h,02h,0Ah,00h ; 50
+
+    log_border_right:
+        ;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30
+        DB 00h,0Ah,02h,02h,02h,02h,02h,02h,0Ah,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h ; 1
+        DB 00h,0Ah,02h,02h,02h,02h,02h,02h,02h,0Eh;00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h ; 2
+        DB 00h,02h,02h,02h,02h,02h,00h,02h,02h,02h,0Eh,0Eh,00h,06h,06h,06h,06h,06h,06h,02h,02h,06h,06h,06h,06h,0Dh,0Dh,06h,06h,00h ; 3
+        DB 00h,02h,02h,02h,02h,02h,00h,00h,02h,02h,02h,0Ah,0Ah,00h,06h,06h,06h,06h,02h,02h,00h,06h,06h,06h,02h,05h,05h,06h,06h,00h ; 4
+        DB 00h,0Ah,02h,02h,02h,02h,02h,00h,00h,02h,02h,02h,0Ah,0Ah,0Eh,06h,06h,06h,06h,06h,00h,06h,06h,06h,02h,00h,06h,06h,06h,00h ; 5
+        DB 00h,00h,0Ah,02h,02h,02h,02h,02h,00h,00h,02h,02h,02h,02h,0Eh,0Eh,0Eh,0Eh,06h,06h,00h,06h,06h,06h,02h,00h,06h,06h,06h,00h ; 6
+        DB 00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,0Eh,0Eh,0Eh,06h,06h,06h,06h,02h,00h,06h,06h,06h,00h ; 7
+        DB 00h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,0Eh,0Eh,0Eh,06h,06h,02h,00h,06h,06h,06h,00h ; 8
+        DB 00h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,0Eh,0Ah,06h,06h,06h,06h,06h,06h,00h ; 9
+        DB 00h,00h,00h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,0Ah,0Ah,0Ah,06h,06h,06h,06h,00h ; 10
+        DB 00h,00h,00h,00h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,02h,0Ah,0Ah,06h,06h,06h,00h ; 11
+        DB 00h,00h,00h,00h,00h,00h,00h,00h,00h,02h,02h,02h,02h,00h,00h,00h,02h,02h,02h,02h,02h,02h,00h,00h,02h,0Ah,0Ah,0Ah,06h,00h ; 12
+        DB 00h,00h,00h,00h,06h,06h,00h,00h,00h,00h,00h,02h,02h,02h,02h,00h,02h,02h,02h,02h,02h,02h,02h,00h,02h,02h,02h,0Ah,0Ah,00h ; 13
+        DB 00h,00h,00h,00h,00h,06h,06h,06h,00h,00h,00h,00h,00h,02h,02h,02h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,0Ah,0Ah ; 14
+        DB 00h,00h,00h,00h,00h,06h,06h,06h,06h,06h,00h,00h,00h,00h,00h,02h,02h,02h,02h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h ; 15
+        DB 00h,00h,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,00h,00h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h ; 16
+        DB 00h,00h,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,06h,00h,00h,00h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h ; 17
+        DB 00h,00h,00h,00h,0Eh,06h,06h,06h,06h,00h,06h,06h,06h,06h,06h,00h,00h,00h,00h,00h,00h,02h,02h,02h,02h,00h,00h,00h,02h,02h ; 18
+        DB 00h,00h,0Eh,0Eh,06h,00h,00h,06h,06h,06h,00h,06h,06h,06h,06h,06h,06h,06h,00h,00h,00h,00h,00h,02h,02h,02h,02h,00h,00h,02h ; 19
+        DB 00h,00h,0Eh,06h,06h,0Eh,00h,06h,06h,06h,00h,06h,06h,06h,06h,06h,06h,06h,06h,00h,00h,00h,00h,00h,02h,02h,02h,02h,02h,02h ; 20
+        DB 00h,00h,0Eh,06h,06h,06h,00h,06h,06h,06h,00h,06h,06h,06h,06h,06h,02h,06h,06h,06h,06h,00h,00h,00h,00h,00h,00h,02h,02h,02h ; 21
+        DB 00h,00h,06h,00h,00h,06h,00h,06h,06h,06h,00h,06h,06h,06h,06h,0Dh,0Dh,06h,06h,06h,06h,06h,06h,00h,00h,00h,00h,00h,00h,00h ; 22
+        DB 00h,00h,06h,00h,00h,06h,00h,06h,06h,00h,00h,06h,06h,06h,06h,05h,05h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h,00h,06h,00h ; 23
+        DB 00h,00h,00h,0Eh,00h,06h,00h,06h,06h,00h,06h,06h,06h,06h,06h,00h,02h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h ; 24
+        DB 00h,00h,00h,06h,00h,06h,00h,06h,06h,06h,06h,06h,06h,06h,00h,00h,02h,06h,06h,06h,06h,06h,06h,06h,00h,06h,06h,06h,06h,00h ; 25
+        DB 00h,00h,00h,06h,00h,06h,00h,06h,06h,06h,06h,06h,06h,06h,00h,02h,02h,06h,06h,06h,06h,06h,06h,06h,00h,06h,06h,06h,06h,00h ; 26
+        DB 00h,00h,00h,06h,00h,06h,00h,06h,06h,06h,06h,06h,06h,06h,00h,02h,06h,06h,06h,06h,06h,06h,06h,02h,00h,06h,06h,06h,06h,00h ; 27
+        DB 00h,00h,00h,06h,00h,06h,00h,06h,06h,06h,06h,06h,06h,06h,00h,02h,06h,06h,06h,06h,06h,06h,06h,02h,00h,06h,06h,06h,06h,00h ; 28
+        DB 00h,00h,06h,00h,00h,06h,00h,06h,06h,06h,06h,06h,06h,06h,00h,06h,06h,06h,06h,06h,00h,00h,06h,06h,00h,06h,06h,06h,0Ah,0Ah ; 29
+        DB 00h,00h,06h,06h,00h,06h,00h,06h,06h,00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h,06h,06h,06h,06h,06h,0Ah,0Ah,0Ah,02h ; 30
+        DB 00h,00h,0Eh,06h,06h,06h,00h,06h,06h,00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h,00h,06h,06h,06h,0Ah,0Ah,0Ah,02h,02h,02h ; 31
+        DB 00h,00h,00h,0Eh,06h,00h,00h,06h,06h,00h,06h,06h,06h,06h,06h,06h,06h,06h,02h,00h,06h,06h,06h,0Ah,0Ah,0Ah,02h,02h,02h,02h ; 32
+        DB 00h,00h,00h,00h,0Eh,06h,06h,06h,06h,00h,06h,06h,06h,06h,06h,06h,06h,06h,02h,00h,06h,06h,0Ah,0Ah,02h,02h,02h,02h,02h,02h ; 33
+        DB 00h,00h,00h,00h,00h,06h,06h,06h,0Dh,0Dh,06h,06h,06h,06h,06h,06h,06h,06h,06h,0Ah,0Ah,0Ah,0Ah,02h,02h,02h,02h,02h,02h,02h ; 34
+        DB 00h,00h,00h,00h,00h,06h,06h,06h,05h,05h,06h,06h,06h,06h,06h,06h,06h,06h,06h,02h,0Ah,02h,02h,02h,02h,02h,02h,02h,02h,02h ; 35
+        DB 00h,00h,00h,00h,00h,06h,06h,06h,02h,00h,06h,06h,06h,06h,06h,06h,00h,0Eh,0Ah,02h,02h,02h,02h,02h,02h,00h,00h,02h,02h,02h ; 36
+        DB 00h,00h,00h,00h,00h,06h,06h,06h,02h,06h,06h,06h,06h,00h,00h,00h,0Eh,0Eh,02h,02h,02h,02h,02h,02h,00h,02h,02h,02h,02h,00h ; 37
+        DB 00h,00h,00h,00h,06h,06h,06h,06h,06h,06h,0Eh,06h,06h,0Eh,0Eh,0Eh,02h,02h,02h,02h,02h,02h,02h,00h,02h,02h,02h,02h,00h,00h ; 38
+        DB 00h,00h,00h,00h,06h,06h,06h,06h,06h,06h,0Eh,0Eh,0Eh,0Eh,02h,00h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h ; 39
+        DB 00h,00h,00h,00h,06h,06h,06h,06h,06h,0Ah,02h,02h,02h,02h,00h,00h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,00h,00h,00h ; 40
+        DB 00h,00h,00h,00h,06h,06h,06h,0Ah,0Ah,0Ah,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,00h,00h,00h,06h,00h ; 41
+        DB 00h,00h,00h,00h,00h,0Ah,0Ah,0Ah,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,00h,06h,06h,06h,06h,00h ; 42
+        DB 00h,00h,00h,00h,0Ah,0Ah,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,06h,06h,06h,06h,06h,00h ; 43
+        DB 00h,00h,00h,0Ah,02h,02h,02h,02h,02h,02h,02h,02h,00h,02h,02h,02h,00h,00h,00h,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,00h ; 44
+        DB 00h,00h,00h,0Ah,02h,02h,00h,02h,02h,02h,00h,00h,02h,02h,02h,00h,00h,00h,00h,00h,00h,02h,06h,06h,06h,00h,06h,06h,06h,00h ; 45
+        DB 00h,00h,0Ah,02h,02h,00h,00h,02h,02h,02h,00h,00h,02h,02h,00h,00h,06h,06h,06h,06h,06h,06h,06h,0Dh,0Dh,00h,06h,06h,06h,00h ; 46
+        DB 00h,00h,0Ah,02h,00h,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,05h,05h,00h,06h,06h,06h,00h ; 47
+        DB 00h,0Ah,02h,02h,02h,02h,02h,02h,02h,02h,00h,00h,00h,00h,00h,06h,06h,06h,06h,00h,00h,06h,06h,02h,02h,00h,06h,06h,06h,00h ; 48
+        DB 00h,0Ah,02h,02h,02h,02h,02h,02h,02h,0Eh,00h,00h,00h,00h,06h,06h,06h,06h,00h,00h,06h,02h,06h,06h,06h,06h,06h,06h,06h,00h ; 49
+        DB 00h,0Ah,02h,02h,02h,02h,02h,02h,0Ah,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h ; 50
+    
+    medium_map_1:
+    	;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh  ; 1
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 2
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 3
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 4
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 5
+    	DB 0Eh,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,0Eh	; 6 
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,0Eh	; 7
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 8
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,00h,00h,0Eh,00h,00h,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 9 
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 10
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 11
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 12
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,00h,00h,0Eh,00h,00h,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 13
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 14
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 15
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 16
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,0Eh	; 17
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,0Eh	; 18
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 19
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 20
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 21
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 22
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh  ; 23
+
+    medium_map_2:
+        ;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh  ; 1
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 2
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 3
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 4
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 5
+    	DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 6 
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 7
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 8
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 9 
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 10
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 11
+        DB 0Eh,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,0Eh	; 12
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 13
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 14
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 15
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 16
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 17
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 18
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 19
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh,0Eh,0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 20
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 21
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 22
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh  ; 23
+
+    hard_map_1:
+        ;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39
+        DB 0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch ; 1
+        DB 0Ch,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 2
+        DB 0Ch,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 3
+        DB 0Ch,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,0Ch ; 4
+        DB 0Ch,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,0Ch ; 5
+        DB 0Ch,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 6
+        DB 0Ch,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 7
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 8
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,00h,00h,00h,00h,0Ch ; 9
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,0Ch,00h,00h,00h,00h,00h,0Ch ; 10
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 11
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 12
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 13
+        DB 0Ch,00h,00h,00h,00h,00h,0Ch,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 14
+        DB 0Ch,00h,00h,00h,00h,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 15
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 16
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,0Ch ; 17
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,0Ch ; 18
+        DB 0Ch,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,0Ch ; 19
+        DB 0Ch,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,0Ch ; 20
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,0Ch ; 21
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,0Ch ; 22
+        DB 0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch ; 23
+
+    hard_map_2:
+        ;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39
+        DB 0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch ; 1
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 2
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 3
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,0Ch ; 4
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,0Ch ; 5
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,0Ch ; 6
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,0Ch,0Ch,00h,00h,0Ch ; 7
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,0Ch ; 8
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 9
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 10
+        DB 0Ch,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,0Ch,00h,00h,0Ch,00h,00h,00h,00h,00h,0Ch,00h,00h,00h,0Ch,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,0Ch ; 11
+        DB 0Ch,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,0Ch,00h,00h,0Ch,00h,00h,00h,00h,00h,0Ch,00h,00h,00h,0Ch,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,0Ch ; 12
+        DB 0Ch,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,0Ch,00h,00h,0Ch,00h,00h,00h,00h,00h,0Ch,00h,00h,00h,0Ch,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,0Ch ; 13
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 14
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 15
+        DB 0Ch,00h,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 16
+        DB 0Ch,00h,00h,0Ch,0Ch,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 17
+        DB 0Ch,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 18
+        DB 0Ch,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 19
+        DB 0Ch,00h,00h,00h,00h,0Ch,0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 20
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 21
+        DB 0Ch,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Ch ; 22
+        DB 0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch ; 23
+
+    w_key:
+        ;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23 
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh ; 1
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 2
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 3
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 4
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 5
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 6
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Eh ; 7
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Eh ; 8
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Eh ; 9
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Eh ; 10
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Eh ; 11
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,0Bh,0Bh,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Eh ; 12
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,0Bh,0Bh,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Eh ; 13
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,0Bh,0Bh,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Eh ; 14
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Eh ; 15
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Eh ; 16
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Eh ; 17
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Eh ; 18
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 19
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 20
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 21
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 22
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh ; 23
+
+    a_key:
+        ;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23 
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh ; 1
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 2
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 3
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 4
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 5
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 6
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 7 
+        DB 0Eh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 8
+        DB 0Eh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 9
+        DB 0Eh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 10
+        DB 0Eh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 11
+        DB 0Eh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 12
+        DB 0Eh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 13
+        DB 0Eh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 14
+        DB 0Eh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 15
+        DB 0Eh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 16
+        DB 0Eh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 17
+        DB 0Eh,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 18
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 19
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 20
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 21
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 22
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh ; 23
+
+    s_key:
+        ;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23 
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh ; 1
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 2
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 3
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 4
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 5
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,0Eh ; 6
+        DB 0Eh,00h,00h,00h,00h,00b,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,0Eh ; 7 
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 8
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 9
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 10
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 11
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 12
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 13
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Bh,0Bh,00h,00h,00h,00h,00h,00h,0Eh ; 14
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Bh,0Bh,00h,00h,00h,00h,00h,00h,0Eh ; 15
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Bh,0Bh,00h,00h,00h,00h,00h,00h,0Eh ; 16
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 17
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 18
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 19
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 20
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 21
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 22
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh ; 23
+
+    d_key:
+        ;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23 
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh ; 1
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 2
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 3
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 4
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 5
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 6
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 7 
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 8
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 9
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 10
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 11
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 12
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 13
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 14
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 15
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,0Eh ; 16
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 17
+        DB 0Eh,00h,00h,00h,00h,00h,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,0Bh,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 18
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 19
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 20
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 21
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh ; 22
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh ; 23
+
 end
