@@ -3,7 +3,27 @@
 <p>Snake game written in 8086 assembly</p>
 <p align="center">
   <img style="width:500px" src="https://i.imgur.com/9aGwXoz.gif" alt="snek demo">
-  <img style="width:500px" src="https://i.imgur.com/XKEFgcs.png" alt="leaderboard">
+  <ul>
+    <li>
+      <h2>Leaderboard</h2>
+      <img style="width:500px" src="https://i.imgur.com/XKEFgcs.png" alt="leaderboard">
+    </li>
+    <li>
+      <h2>Easy</h2>
+      <img style="width:500px" src="https://i.imgur.com/2UW7pIZ.png" alt="easy">
+    </li>
+    <li>
+      <h2>Medium</h2>
+      <img style="width:500px" src="https://i.imgur.com/CmAKk90.png" alt="med0">
+      <img style="width:500px" src="https://i.imgur.com/gdf158P.png" alt="med1">
+    </li>
+    <li>
+      <h2>Hard</h2>
+      <img style="width:500px" src="https://i.imgur.com/R1Wscyw.png" alt="hard0">
+      <img style="width:500px" src="https://i.imgur.com/vl52k5p.png" alt="hard1">
+    </li>
+  </ul>
+
 </p>
 <ul>
   <h2>NOTES</h2>
