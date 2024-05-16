@@ -1144,10 +1144,10 @@
         ret
     calculate_pos endp
 
-    draw_img proc   ; args: si = bitmap addr | bx = sprite dimensions    NOTE: call calculate_pos first
-        mov ax, 0A000h
+    draw_img proc   ; args: si = bitmap addr | bx = sprite dimensions (bh=height, hl=width) ; NOTE: calculate the position of the sprite first
+        mov ax, 0A000h  ; vram segment
         mov es, ax   
-        mov cl, bl
+        mov cl, bl  
         y_axis:
             push di
                 mov ch, bh
@@ -1194,7 +1194,7 @@
         inc dl
         mov bh, dl  ; x coord
 
-        mov word ptr [di], bx   ; update coordinates of the variable in the given address
+        mov word ptr [di], bx   ; update coordinates of the variable in the given address (either rotten_pos or food_pos)
 
         lea si, border_pos
         mov bp, 0
