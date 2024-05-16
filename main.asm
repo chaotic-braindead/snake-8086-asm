@@ -992,10 +992,76 @@
         lea bp, strMechNavi1
         call str_out
 
+        call draw_log_borders
+
+        ; draw w
+        mov dx, 1308h
+        lea si, w_key
+        call draw_key
+        
+        
+        ; draw a
+        mov dx, 100Bh
+        lea si, a_key
+        call draw_key
+
+        ; draw s
+        mov dx, 130Bh
+        lea si, s_key 
+        call draw_key
+
+        ; draw d 
+        mov dx, 160Bh
+        lea si, d_key
+        call draw_key 
+
         mov ch, 1
         call mech_get_resp
         ret
     mech_page_1 endp
+    draw_log_borders proc 
+        mov cx, 4
+        mov dx, 0
+        lea si, log_border_left
+        draw_log_border_left:      
+            call draw_log_border
+            loop draw_log_border_left
+
+        mov cx, 4
+        mov dx, 2400h
+        lea si, log_border_right
+        draw_log_border_right:
+            call draw_log_border
+            loop draw_log_border_right
+        ret
+    draw_log_borders endp
+    draw_log_border proc
+        call calculate_pos 
+        push cx   
+        mov ax, @code 
+        mov ds, ax 
+        push dx
+        mov bh, 30
+        mov bl, 50
+        push bx
+        push si
+        call draw_img
+        pop si
+        pop bx
+        pop dx 
+        add dl, 6
+        pop cx
+        ret
+    draw_log_border endp
+    draw_key proc 
+        call calculate_pos
+        mov ax, @code 
+        mov ds, ax 
+        mov bh, 23
+        mov bl, 23
+        call draw_img 
+        ret
+    draw_key endp
 
     mech_page_2 proc
         mov ax, @data
@@ -1035,11 +1101,96 @@
         lea bp, strMechNavi2
         call str_out
 
+        call draw_log_borders
+
+        mov dx, 0C0Ch
+        call calculate_pos 
+        lea si, snake_head_left
+        mov bh, 8
+        mov bl, 8
+        call draw_img 
+
+        mov dx, 0D0Ch
+        mov cx, 7
+        call draw_segments
+        
+        mov dx, 0B07h
+        mov cx, 8
+        draw_sample_wall:
+            push cx
+            push dx 
+            call calculate_pos
+            pop dx 
+            inc dl
+            mov bh, 8
+            mov bl, 8
+            lea si, wall
+            call draw_img 
+            pop cx
+            loop draw_sample_wall
+
+        mov dx, 160Ch
+        call calculate_pos 
+        lea si, snake_head_left
+        mov bh, 8
+        mov bl, 8
+        call draw_img 
+
+        mov dx, 170Ch
+        mov cx, 7
+        call draw_segments
+
+        mov dx, 1507h
+        mov cx, 8
+        draw_body_wall:
+            push cx
+            push dx 
+            call calculate_pos
+            pop dx 
+            inc dl
+            mov bh, 8
+            mov bl, 8
+            lea si, snake_body
+            call draw_img 
+            pop cx
+            loop draw_body_wall
+        
+        mov dx, 1607h
+        mov cx, 8
+        draw_horizontal_body:
+            push cx
+            push dx 
+            call calculate_pos
+            pop dx 
+            inc dh
+            mov bh, 8
+            mov bl, 8
+            lea si, snake_body
+            call draw_img 
+            pop cx
+            loop draw_horizontal_body
+        
         mov ch, 2
         call mech_get_resp
         ret
     mech_page_2 endp
 
+    draw_segments proc 
+        segments:
+            push cx
+            push dx 
+            call calculate_pos
+            pop dx 
+            inc dh
+            mov bh, 8
+            mov bl, 8
+            lea si, snake_body
+            call draw_img 
+            pop cx
+            loop draw_segments
+        ret
+    draw_segments endp
+    
     mech_page_3 proc
         mov ax, @data
         mov es, ax
@@ -1085,6 +1236,8 @@
         mov cx, strMechNavi3_l
         lea bp, strMechNavi3
         call str_out
+
+        call draw_log_borders 
 
         mov ch, 3
         call mech_get_resp
@@ -1137,6 +1290,8 @@
         lea bp, strMechNavi4
         call str_out
 
+        call draw_log_borders 
+
         mov ch, 4
         call mech_get_resp
         ret
@@ -1188,7 +1343,9 @@
         lea bp, strMechNavi5
         call str_out
 
-        mov ch, 5
+        call draw_log_borders 
+
+        mov ch, 5   
         call mech_get_resp
         ret
     mech_page_5 endp
@@ -1230,6 +1387,8 @@
         mov cx, strMechNavi6_l
         lea bp, strMechNavi6
         call str_out
+
+        call draw_log_borders 
 
         mov ch, 6
         call mech_get_resp
@@ -1321,6 +1480,8 @@
         mov cx, strMechNavi7_l
         lea bp, strMechNavi7
         call str_out
+
+        call draw_log_borders 
 
         mov ch, 7
         call mech_get_resp
@@ -2235,7 +2396,7 @@
     log_border_right:
         ;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30
         DB 00h,0Ah,02h,02h,02h,02h,02h,02h,0Ah,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h ; 1
-        DB 00h,0Ah,02h,02h,02h,02h,02h,02h,02h,0Eh;00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h ; 2
+        DB 00h,0Ah,02h,02h,02h,02h,02h,02h,02h,0Eh,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h ; 2
         DB 00h,02h,02h,02h,02h,02h,00h,02h,02h,02h,0Eh,0Eh,00h,06h,06h,06h,06h,06h,06h,02h,02h,06h,06h,06h,06h,0Dh,0Dh,06h,06h,00h ; 3
         DB 00h,02h,02h,02h,02h,02h,00h,00h,02h,02h,02h,0Ah,0Ah,00h,06h,06h,06h,06h,02h,02h,00h,06h,06h,06h,02h,05h,05h,06h,06h,00h ; 4
         DB 00h,0Ah,02h,02h,02h,02h,02h,00h,00h,02h,02h,02h,0Ah,0Ah,0Eh,06h,06h,06h,06h,06h,00h,06h,06h,06h,02h,00h,06h,06h,06h,00h ; 5
