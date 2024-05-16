@@ -6,8 +6,8 @@
     key_pressed db 'd'
     prev_key db ?
     time_now db 00h
-    food_pos dw 0A0Ah
-    food_seed dw 0401h  ; used so that rotten_pos and food_pos are not the same when generating random numbers
+    food_pos dw ?
+    food_seed dw 0401h  ; used so that rotten_pos and food_pos are different when generating random numbers
     eat_streak db 0
     rotten_pos dw ?
     rotten_seed dw 1F52h
@@ -245,6 +245,7 @@
 
         diff_page:
             mov ax, @data
+            mov ds, ax
             mov es, ax
             call cls
             ;write diff prompt
@@ -744,9 +745,6 @@
         int 21h
     jnz iter_scores
 
-        ;mov ah, 4ch
-        ;int 21h
-
         back_to_menu:
         mov dl, 14
         mov bl, 0Eh ; yellow
@@ -800,7 +798,7 @@
         
         start: mov snake_length, 0 ; reset score for next game loop
         game_loop:
-            call upperborder
+            call header
             call input
             call draw
             call move
@@ -874,7 +872,7 @@
             int 21h
     InvalidMsg endp
 
-    upperborder proc
+    header proc
         mov ax, @data
         mov es, ax 
 
@@ -924,7 +922,7 @@
         lea bp, strSnek ; string in es:bp 
         int 10h
         ret
-    upperborder endp 
+    header endp 
 
     input proc
         mov ah, 01h ; get user input
@@ -1106,20 +1104,9 @@
 
         cmp difficulty, 0
         je draw_easy
-        cmp difficulty, 1
-        je draw_diff
-        cmp difficulty, 2
-        je draw_diff
 
-       ; draw_med:
-       ;     lea si, med_pos
-       ;     jmp init_len 
-       ; draw_hard:
-       ;     lea si, hard_pos
-        draw_diff:
-            lea si, active_wall_pos
-        init_len:
-            mov bp, word ptr [si]
+        lea si, active_wall_pos
+        mov bp, word ptr [si]
         draw_wall: 
             add si, 2
             mov dx, word ptr [si]
@@ -1225,16 +1212,7 @@
         cont:
             cmp difficulty, 0
             je snake_col
-           ;cmp difficulty, 1
-           ;je ldmedwall
-           ;cmp difficulty, 2
-           ;je ldhardwall            
 
-           ;ldmedwall:
-           ;    lea si, med_pos 
-           ;    jmp init_wall 
-           ;ldhardwall:
-           ;    lea si, hard_pos 
            lea si, active_wall_pos
         init_wall:
         mov bp, word ptr [si]
