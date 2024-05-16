@@ -1204,7 +1204,7 @@
             mov ax, word ptr [si]
             mov bx, word ptr [di]
             cmp ax, bx 
-            je randstart    ; generate another coord already occupied by a wall
+            je randstart    ; generate another coord if already occupied by a wall
             inc bp 
             add si, 2
             jmp find_border
