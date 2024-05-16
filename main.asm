@@ -17,8 +17,13 @@
 
     difficulty db ?  ; change difficulty here | 0 = easy, 1 = med, 2 = hard
 
-    med_pos dw 12,0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h                  
-    hard_pos dw 24,0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h,0110h,0210h,0310h,0410h,0510h,0610h,260Ah,250Ah,240Ah,230Ah,220Ah,210Ah
+    med_pos0 dw 30,0806h,0807h,0811h,0812h,0906h,0907h,0911h,0912h,0a06h,0a07h,0a11h,0a12h,100ah,100eh,130ah,130eh,160ah,160eh,1c06h,1c07h,1c11h,1c12h,1d06h,1d07h,1d11h,1d12h,1e06h,1e07h,1e11h,1e12h
+    med_pos1 dw 30,080ch,0b0ch,0c0ch,1204h,1205h,1206h,1207h,1211h,1212h,1213h,1214h,1304h,1305h,1306h,1307h,1311h,1312h,1313h,1314h,1404h,1405h,1406h,1407h,1411h,1412h,1413h,1414h,1a0ch,1b0ch,1e0ch
+   
+    hard_pos0 dw 60,0302h,0303h,0304h,0305h,0306h,0307h,0402h,0403h,0404h,0405h,0406h,0407h,050fh,060eh,0313h,0314h,0413h,0414h,0e0eh,0e0fh,0e10h,0e11h,0f0eh,0f0fh,0f10h,0f11h,1010h,1011h,1110h,1111h,1507h,1508h,1607h,1608h,1707h,1708h,1709h,170ah,1807h,1808h,1809h,180ah,200ah,2109h,2204h,2205h,2304h,2305h,2211h,2212h,2213h,2214h,2215h,2216h,2311h,2312h,2313h,2314h,2315h,2316h
+    hard_pos1 dw 60,0311h,0312h,0411h,0412h,050bh,050ch,050dh,0513h,0514h,060bh,060ch,060dh,0610h,0611h,0613h,0614h,0710h,0711h,0d0bh,0d0ch,0d0dh,100bh,100ch,100dh,1206h,1207h,1211h,1212h,1306h,1307h,1311h,1312h,1406h,1407h,1411h,1412h,160bh,160ch,160dh,190bh,190ch,190dh,1f07h,1f08h,2004h,2005h,2007h,2008h,200bh,200ch,200dh,2104h,2105h,210bh,210ch,210dh,2206h,2207h,2306h,2307h
+
+    active_wall_pos dw 61 dup (?)
 
     strScore db 'SCORE:'
     strScore_l equ $-strScore
@@ -284,11 +289,13 @@
             cmp al, '2'
                 jnz hard 
                 mov difficulty, 1
+                call load_walls
                 call main_loop
             hard:
             cmp al, '3'
                 jnz mm 
                 mov difficulty, 2
+                call load_walls
                 call main_loop
             mm:
             cmp al, 'b'
@@ -297,7 +304,50 @@
                 jmp diff_page
                 df_menu: jmp menu_page
             
-        
+        load_walls proc
+            ;get random bit (0 or 1) using systime for map choice
+            mov ax, @data
+            mov ds, ax
+            mov ah, 00h
+            int 1ah
+            mov ax, dx
+            xor dx, dx
+            mov cx, 10
+            div cx
+            xor dx, 01h ;get the least significant bit
+            ;0 or 1 is now stored in dl
+            cmp difficulty, 1
+            jnz load_hard
+                cmp dl, 1
+                jnz medzero
+                    lea si, med_pos1
+                    jmp load_active
+                medzero:
+                    lea si, med_pos0
+                    jmp load_active
+            load_hard:
+                cmp dl, 1
+                jnz hardzero
+                    lea si, hard_pos1
+                    jmp load_active
+                hardzero:
+                    lea si, hard_pos0
+                    jmp load_active
+            load_active:
+                lea di, active_wall_pos
+                mov cx, word ptr [si]
+                mov word ptr [di], cx
+                add si, 2
+                add di, 2
+                ldwall:
+                    mov dx, word ptr [si]
+                    mov word ptr [di], dx
+                    add si, 2
+                    add di, 2
+                    loop ldwall
+            ret
+        load_walls endp
+
         game_over_page proc
             mov ax, @data
             mov es, ax
@@ -1057,15 +1107,17 @@
         cmp difficulty, 0
         je draw_easy
         cmp difficulty, 1
-        je draw_med
+        je draw_diff
         cmp difficulty, 2
-        je draw_hard
+        je draw_diff
 
-        draw_med:
-            lea si, med_pos
-            jmp init_len 
-        draw_hard:
-            lea si, hard_pos
+       ; draw_med:
+       ;     lea si, med_pos
+       ;     jmp init_len 
+       ; draw_hard:
+       ;     lea si, hard_pos
+        draw_diff:
+            lea si, active_wall_pos
         init_len:
             mov bp, word ptr [si]
         draw_wall: 
@@ -1173,16 +1225,17 @@
         cont:
             cmp difficulty, 0
             je snake_col
-            cmp difficulty, 1
-            je ldmedwall
-            cmp difficulty, 2
-            je ldhardwall            
+           ;cmp difficulty, 1
+           ;je ldmedwall
+           ;cmp difficulty, 2
+           ;je ldhardwall            
 
-            ldmedwall:
-                lea si, med_pos 
-                jmp init_wall 
-            ldhardwall:
-                lea si, hard_pos 
+           ;ldmedwall:
+           ;    lea si, med_pos 
+           ;    jmp init_wall 
+           ;ldhardwall:
+           ;    lea si, hard_pos 
+           lea si, active_wall_pos
         init_wall:
         mov bp, word ptr [si]
         find_wall:
@@ -1208,7 +1261,6 @@
                 je genagain ; generate another coord if food_pos is already occupied by snake
                 add si, 2
                 jmp snake_loop
-        
         genagain: 
             mov bx, di
             call rng
@@ -1264,12 +1316,10 @@
             mov temp_pos, dx
             dec bp 
             jmp body_move
-
         skip:
             mov ax, @data
             mov ds, ax
             lea si, snake_pos
-
         check_key:
             mov dx, word ptr [si]
             cmp key_pressed, 'w'
@@ -1318,7 +1368,6 @@
             mov key_pressed, ah
             jmp check_key
         stop:
-            call cls
             call game_over_page
             ret
         collision:
@@ -1358,82 +1407,82 @@
                 dec bl 
                 jmp stop
 
-                food_collision:
-                    lea si, snake_pos
+            food_collision:
+                lea si, snake_pos
+                lea di, food_pos
+                mov ax, word ptr [si]
+                mov bx, word ptr [di]
+
+                inc ah
+                cmp ah, bh 
+                jng rotten_collision 
+                dec ah 
+
+                inc bh
+                cmp ah, bh
+                jnl rotten_collision
+
+                inc al
+                cmp al, bl 
+                jng rotten_collision 
+                dec al
+
+                inc bl
+                cmp al, bl
+                jnl rotten_collision 
+
+                cmp eat_streak, 5
+                je superapl
+                inc snake_length
+                inc eat_streak
+                jmp rand
+                superapl:
+                    add snake_length, 3
+                    mov eat_streak, 0                    
+                rand: 
                     lea di, food_pos
-                    mov ax, word ptr [si]
-                    mov bx, word ptr [di]
+                    mov bp, food_seed
+                    call rng
 
-                    inc ah
-                    cmp ah, bh 
-                    jng rotten_collision 
-                    dec ah 
+            rotten_collision:
+                lea si, snake_pos
+                lea di, rotten_pos
+                mov ax, word ptr [si]
+                mov bx, word ptr [di]
 
-                    inc bh
-                    cmp ah, bh
-                    jnl rotten_collision
+                inc ah
+                cmp ah, bh 
+                jng wall_collision 
+                dec ah 
 
-                    inc al
-                    cmp al, bl 
-                    jng rotten_collision 
-                    dec al
+                inc bh
+                cmp ah, bh
+                jnl wall_collision
 
-                    inc bl
-                    cmp al, bl
-                    jnl rotten_collision 
+                inc al
+                cmp al, bl 
+                jng wall_collision 
+                dec al
 
-                    cmp eat_streak, 5
-                    je superapl
-                    inc snake_length
-                    inc eat_streak
-                    jmp rand
-                    superapl:
-                        add snake_length, 3
-                        mov eat_streak, 0                    
-                    rand: 
-                        lea di, food_pos
-                        mov bp, food_seed
-                        call rng
+                inc bl
+                cmp al, bl
+                jnl wall_collision 
 
-                rotten_collision:
-                    lea si, snake_pos
+                cmp snake_length, 0
+                jne decrlife
+                jmp stop
+                decrlife:
+                    ; reset coords of the snake's tail 
+                    ; (fixes issue wherein old tail is drawn on the coordinate where snake last ate a rotten apple)
+                    mov bx, snake_length
+                    shl bx, 1   ; basically bx *= 2
+                    mov word ptr [si+bx], 0
+
+                    dec snake_length                    
                     lea di, rotten_pos
-                    mov ax, word ptr [si]
-                    mov bx, word ptr [di]
-
-                    inc ah
-                    cmp ah, bh 
-                    jng wall_collision 
-                    dec ah 
-
-                    inc bh
-                    cmp ah, bh
-                    jnl wall_collision
-
-                    inc al
-                    cmp al, bl 
-                    jng wall_collision 
-                    dec al
-
-                    inc bl
-                    cmp al, bl
-                    jnl wall_collision 
-
-                    cmp snake_length, 0
-                    jne decrlife
-                    jmp stop
-                    decrlife:
-                        ; reset coords of the snake's tail 
-                        ; (fixes issue wherein old tail is drawn on the coordinate where snake last ate a rotten apple)
-                        mov bx, snake_length
-                        shl bx, 1   ; basically bx *= 2
-                        mov word ptr [si+bx], 0
-
-                        dec snake_length                    
-                        lea di, rotten_pos
-                        mov bp, rotten_seed
-                        call rng 
-                    
+                    mov bp, rotten_seed
+                    call rng 
+                
             wall_collision:
                 mov ax, @data
                 mov ds, ax 
@@ -1441,22 +1490,13 @@
 
                 cmp difficulty, 0
                 je return 
-                cmp difficulty, 1
-                je collision_med
-                cmp difficulty, 2
-                je collision_hard 
 
-                collision_med:
-                    lea si, med_pos
-                    jmp init
-                collision_hard: 
-                    lea si, hard_pos 
-                init:
-                    mov bp, word ptr [si]
+                lea si, active_wall_pos
+                mov bp, word ptr [si] ; get length of active wall array
                 check_wall_col:
+                    dec bp
                     cmp bp, 0
                     jl return
-                    dec bp
                     add si, 2
                     mov ax, word ptr [di]
                     mov bx, word ptr [si]
