@@ -7,6 +7,8 @@
     prev_key db ?
     time_now db 00h
     food_pos dw 0A0Ah
+    eat_streak db 0
+    rotten_pos dw ?
     temp_pos dw ?
     border_pos dw 28h+28h+18h+18h dup (?)
     paused db 0
@@ -70,6 +72,9 @@
 
     strRetry db "[R] RETRY",13,10
     strRetry_l equ $ - strRetry
+
+    strSave db "[S] SAVE",13,10
+    strSave_l equ $-strSave
 
     strMenu db "[M] MAIN MENU",13,10
     strMenu_l equ $ - strMenu 
@@ -160,8 +165,6 @@
         mov bx, 0000h
         int 10h
         
-    
-    
     menu_page:
         mov ax, @data
         mov es, ax
@@ -358,12 +361,19 @@
             lea bp, strMenu
             call str_out
 
+            mov dh, 14
+            mov cx, strSave_l
+            lea bp, strSave
+            call str_out
+
+
             call resp
             cmp al, 'r'
                 jz retry
-
             cmp al, 'm'
                 je go_menu
+            cmp al, 's'
+                je go_save
 
             cmp al, 27
                 je go_exit
@@ -374,6 +384,218 @@
                 go_menu: jmp menu_page
                 go_exit: jmp exit
             ret
+
+            go_save:
+            call cls
+            mov ax, @data
+            mov ds, ax
+            mov es, ax 
+
+            lea bp, strUname
+            mov cx, strUname_l
+            mov bl, 0Fh
+            mov dh, 8
+            mov dl, 12
+            call str_out
+            
+            mov cx, 3
+            mov bp, 0
+            underscore:
+                mov ah, 2
+                mov dh, 10
+                mov dl, 18
+                add dx, bp 
+                inc bp
+                mov bh, 0
+                int 10h
+
+                mov ax, 092dh
+                mov bl, 0eh
+                mov bh, 0
+                push cx
+                mov cx, 1
+                int 10h
+                pop cx
+            loop underscore
+            
+            lea si, uname 
+            mov cx, 3
+            mov bp, 0
+            get_uname:
+                mov ah, 7
+                int 21h
+               
+                mov ah, 2
+                mov dh, 10
+                mov dl, 18
+                add dx, bp 
+                inc bp
+                mov bh, 0
+                int 10h
+
+                cmp al, 8
+                jne printchar
+
+                mov ah, 2
+                dec dx 
+                dec bp
+                dec bp
+                dec si
+                mov bh, 0
+                int 10h
+
+                mov ax, 0a2dh
+                mov bh, 0
+                mov cx, 1
+                int 10h 
+
+                jmp get_uname
+
+                printchar:
+                    mov ah, 0ah
+                    mov bh, 0
+                    mov bl, 0eh
+                    push cx
+                    mov cx, 1
+                    int 10h
+                    pop cx
+                
+                mov byte ptr [si], al
+                inc si
+            cmp bp, 3
+            je confirm_uname
+            jmp get_uname
+            
+            confirm_uname:
+                lea bp, strCont
+                mov cx, strCont_l
+                mov bl, 0Fh
+                mov dh, 14
+                mov dl, 7
+                call str_out
+
+                mov ah, 7
+                int 21h
+                mov byte ptr [si], '$'
+                mov ax, snake_length
+                lea si, iscore 
+                mov byte ptr [si+1], al
+             
+            ;open file  
+            mov ax, 3d02h
+            lea dx, filename
+            int 21h
+            mov handle, ax
+            ;seek to start of file
+            mov ax, 4200h
+            mov bx, handle
+            mov cx, 0
+            mov dx, 0
+            int 21h
+
+            ;read from file
+            mov ah, 3fh
+            mov bx, handle
+            mov cx, 1fh
+            lea dx, scores
+            int 21h
+            
+            ;insert
+            lea di, scores
+            xor ax, ax
+            mov al, byte ptr [di]
+            mov bl, 06h ;go to the last score record
+            mul bl
+            xor ah, ah
+            add di, ax ;move di to the the last byte of the last record
+            add di, 01h
+            insrec:
+                lea si, uname
+                mov cx, 04h
+                inpname:
+                    mov dl, byte ptr [si]
+                    mov byte ptr [di], dl
+                    inc si
+                    inc di
+                    loop inpname
+                lea si, iscore
+                mov dh, byte ptr [si]
+                mov dl, byte ptr [si+1]
+                mov byte ptr [di], dh
+                mov byte ptr [di+1], dl
+            
+            ;increment score size 
+            lea si, scores
+            mov ch, byte ptr [si]
+            inc ch
+            mov byte ptr [si], ch
+            
+            ;SORTING
+            mov dh, ch
+            ;ch = outer loop counter
+            ;dh = inner loop counter
+            outsort:
+                lea si, scores ;reset pointers
+                lea di, scores
+                add si, 06h
+                add di, 06h
+                push cx
+                mov ch, dh
+                insort:
+                    mov di, si
+                    mov al, byte ptr [si]
+                    mov ah, byte ptr [si-1]
+                    mov bl, byte ptr [si+6]
+                    mov bh, byte ptr [si+5]
+                    cmp ax, bx
+                    jge noswap
+                    add di, 01h
+                    sub si, 05h
+                    mov dl, 06h
+                    swapscore:
+                        mov bh, byte ptr [di]
+                        mov bl, byte ptr [si]
+                        mov byte ptr [di], bl
+                        mov byte ptr [si], bh
+                        inc si
+                        inc di
+                        dec dl
+                        jnz swapscore
+                    noswap:
+                    add si, 06h
+                    dec ch 
+                jnz insort
+                pop cx
+                dec dh
+                dec ch
+            jnz outsort
+
+            ;cap score size for storage
+            lea si, scores
+            mov al, byte ptr [si]
+            cmp al, 05h
+            jle undercap
+            mov al, 05h
+            undercap:
+            mov byte ptr[si], al
+                
+            ;seek to start of file
+            mov ax, 4200h
+            mov bx, handle
+            mov cx, 0
+            mov dx, 0
+            int 21h
+            ;write to file
+            mov ah, 40h
+            mov bx, handle
+            lea dx, scores
+            mov cx, 1fh;
+            int 21h
+            ;close file
+            mov ah, 3eh
+            mov bx, handle
+            int 21h
+            jmp menu_page
         game_over_page endp
 
     lead_page:
@@ -499,6 +721,9 @@
         jmp back_to_menu
 
     main_loop proc
+        lea di, food_pos
+        call rng
+        lea di, rotten_pos
         call rng
         lea si, snake_pos
         mov word ptr [si], 0A0Ah ; snake's initial position 
@@ -754,9 +979,29 @@
             mov dx, food_pos
             call calculate_pos
 
+            mov ax, @data
+            mov ds, ax
+            mov bl, eat_streak
+
             mov ax, @code
             mov ds, ax
+            cmp bl, 5
+            je load_super
             lea si, food_map
+            jmp draw_apple
+            load_super: 
+                lea si, super_apple
+            draw_apple:
+            call draw_img
+
+            mov ax, @data 
+            mov ds,  ax 
+            mov dx, rotten_pos
+            call calculate_pos
+            
+            mov ax, @code
+            mov ds, ax
+            lea si, rotten_apple
             call draw_img
         
         draw_border:
@@ -854,7 +1099,7 @@
         ret
     draw endp 
 
-    rng proc       
+    rng proc       ; args : di = addr of variable
         mov ax, @data
         mov ds, ax
     randstart:
@@ -879,7 +1124,8 @@
         
         inc dl
         mov bh, dl  ; x coord
-        mov food_pos, bx
+
+        mov word ptr [di], bx
 
         lea si, border_pos
         mov bp, 0
@@ -887,7 +1133,7 @@
             cmp bp, 28h+28h+18h+18h
             jg cont
             mov ax, word ptr [si]
-            mov bx, food_pos
+            mov bx, word ptr [di]
             cmp ax, bx 
             je randstart    ; generate another coord if food_pos is already occupied by a wall
             inc bp 
@@ -915,7 +1161,7 @@
             add si, 2
             dec bp 
             mov ax, word ptr [si]
-            mov bx, food_pos
+            mov bx, word ptr [di]
             cmp ax, bx 
             je randstart    ; generate another coord if food_pos is already occupied by a wall
             jmp find_wall
@@ -927,13 +1173,14 @@
                 je rngdone
                 dec bp
                 mov ax, word ptr [si]
-                mov bx, food_pos 
+                mov bx, word ptr [di] 
                 cmp ax, bx 
                 je genagain ; generate another coord if food_pos is already occupied by snake
                 add si, 2
                 jmp snake_loop
         
         genagain: 
+            mov bx, di
             call rng
         rngdone:
             ret
@@ -1041,216 +1288,6 @@
             jmp check_key
         stop:
             call cls
-
-            mov ax, @data
-            mov ds, ax
-            mov es, ax 
-
-            lea bp, strUname
-            mov cx, strUname_l
-            mov bl, 0Fh
-            mov dh, 8
-            mov dl, 12
-            call str_out
-            
-            mov cx, 3
-            mov bp, 0
-            underscore:
-                mov ah, 2
-                mov dh, 10
-                mov dl, 18
-                add dx, bp 
-                inc bp
-                mov bh, 0
-                int 10h
-
-                mov ax, 092dh
-                mov bl, 0eh
-                mov bh, 0
-                push cx
-                mov cx, 1
-                int 10h
-                pop cx
-            loop underscore
-            
-            lea si, uname 
-            mov cx, 3
-            mov bp, 0
-            get_uname:
-                mov ah, 7
-                int 21h
-               
-                mov ah, 2
-                mov dh, 10
-                mov dl, 18
-                add dx, bp 
-                inc bp
-                mov bh, 0
-                int 10h
-
-                cmp al, 8
-                jne printchar
-
-                mov ah, 2
-                dec dx 
-                dec bp
-                dec bp
-                dec si
-                mov bh, 0
-                int 10h
-
-                mov ax, 0a2dh
-                mov bh, 0
-                mov cx, 1
-                int 10h 
-
-                jmp get_uname
-
-                printchar:
-                    mov ah, 0ah
-                    mov bh, 0
-                    mov bl, 0eh
-                    push cx
-                    mov cx, 1
-                    int 10h
-                    pop cx
-                
-                mov byte ptr [si], al
-                inc si
-            cmp bp, 3
-            je confirm_uname
-            jmp get_uname
-            
-            confirm_uname:
-                lea bp, strCont
-                mov cx, strCont_l
-                mov bl, 0Fh
-                mov dh, 14
-                mov dl, 7
-                call str_out
-
-                mov ah, 7
-                int 21h
-                mov byte ptr [si], '$'
-                mov ax, snake_length
-                lea si, iscore 
-                mov byte ptr [si+1], al
-             
-            ;open file  
-            mov ax, 3d02h
-            lea dx, filename
-            int 21h
-            mov handle, ax
-            ;seek to start of file
-            mov ax, 4200h
-            mov bx, handle
-            mov cx, 0
-            mov dx, 0
-            int 21h
-
-            ;read from file
-            mov ah, 3fh
-            mov bx, handle
-            mov cx, 1fh
-            lea dx, scores
-            int 21h
-            
-            ;insert
-            lea di, scores
-            xor ax, ax
-            mov al, byte ptr [di]
-            mov bl, 06h ;go to the last score record
-            mul bl
-            xor ah, ah
-            add di, ax ;move di to the the last byte of the last record
-            add di, 01h
-            insrec:
-                lea si, uname
-                mov cx, 04h
-                inpname:
-                    mov dl, byte ptr [si]
-                    mov byte ptr [di], dl
-                    inc si
-                    inc di
-                    loop inpname
-                lea si, iscore
-                mov dh, byte ptr [si]
-                mov dl, byte ptr [si+1]
-                mov byte ptr [di], dh
-                mov byte ptr [di+1], dl
-            
-            ;increment score size 
-            lea si, scores
-            mov ch, byte ptr [si]
-            inc ch
-            mov byte ptr [si], ch
-            
-            ;SORTING
-            mov dh, ch
-            ;ch = outer loop counter
-            ;dh = inner loop counter
-            outsort:
-                lea si, scores ;reset pointers
-                lea di, scores
-                add si, 06h
-                add di, 06h
-                push cx
-                mov ch, dh
-                insort:
-                    mov di, si
-                    mov al, byte ptr [si]
-                    mov ah, byte ptr [si-1]
-                    mov bl, byte ptr [si+6]
-                    mov bh, byte ptr [si+5]
-                    cmp ax, bx
-                    jge noswap
-                    add di, 01h
-                    sub si, 05h
-                    mov dl, 06h
-                    swapscore:
-                        mov bh, byte ptr [di]
-                        mov bl, byte ptr [si]
-                        mov byte ptr [di], bl
-                        mov byte ptr [si], bh
-                        inc si
-                        inc di
-                        dec dl
-                        jnz swapscore
-                    noswap:
-                    add si, 06h
-                    dec ch 
-                jnz insort
-                pop cx
-                dec dh
-                dec ch
-            jnz outsort
-
-            ;cap score size for storage
-            lea si, scores
-            mov al, byte ptr [si]
-            cmp al, 05h
-            jle undercap
-            mov al, 05h
-            undercap:
-            mov byte ptr[si], al
-                
-            ;seek to start of file
-            mov ax, 4200h
-            mov bx, handle
-            mov cx, 0
-            mov dx, 0
-            int 21h
-            ;write to file
-            mov ah, 40h
-            mov bx, handle
-            lea dx, scores
-            mov cx, 1fh;
-            int 21h
-            ;close file
-            mov ah, 3eh
-            mov bx, handle
-            int 21h
-
             call game_over_page
             ret
         collision:
@@ -1289,12 +1326,12 @@
                 jnl body_collision
                 dec bl 
                 jmp stop
-                ;call game_over_page
 
                 food_collision:
                     lea si, snake_pos
+                    lea di, food_pos
                     mov ax, word ptr [si]
-                    mov bx, food_pos
+                    mov bx, word ptr [di]
 
                     inc ah
                     cmp ah, bh 
@@ -1314,11 +1351,17 @@
                     cmp al, bl
                     jnl wall_collision 
 
+                    cmp eat_streak, 5
+                    je superapl
                     inc snake_length
+                    inc eat_streak
+                    jmp rand
+                    superapl:
+                        add snake_length, 3
+                        mov eat_streak, 0
                     
-                    mov ax, 120Ch 
-                    mov food_pos, ax
-                    call rng 
+                    lea di, food_pos
+                    rand: call rng 
             wall_collision:
                 mov ax, @data
                 mov ds, ax 
@@ -1433,6 +1476,24 @@ delay endp
         DB 00h,0Fh,0Ch,0Ch,0Ch,0Ch,0Ch,00h  
         DB 00h,0Ch,0Ch,0Ch,0Ch,0Ch,0Ch,00h  
         DB 00h,00h,0Ch,0Ch,0Ch,0Ch,00h,00h  
+        DB 00h,00h,00h,00h,00h,00h,00h,00h  
+    rotten_apple:
+        DB 00h,00h,00h,06h,06h,00h,00h,00h  
+        DB 00h,00h,0Ah,00h,00h,02h,00h,00h  
+        DB 00h,02h,0Fh,02h,0Ah,02h,02h,00h  
+        DB 00h,0Fh,06h,06h,02h,06h,02h,00h  
+        DB 00h,06h,06h,02h,06h,06h,06h,00h  
+        DB 00h,06h,06h,06h,06h,07h,07h,00h  
+        DB 00h,00h,06h,06h,07h,07h,00h,00h  
+        DB 00h,00h,00h,00h,00h,00h,00h,00h  
+    super_apple:
+        DB 00h,00h,00h,0Ch,0Ch,00h,00h,00h  
+        DB 00h,00h,0Eh,00h,00h,0Eh,00h,00h  
+        DB 00h,0Eh,0Fh,0Eh,0Eh,0Eh,0Eh,00h  
+        DB 00h,0Fh,0Dh,0Dh,0Eh,0Dh,0Eh,00h  
+        DB 00h,0Dh,0Dh,0Eh,0Dh,0Dh,0Dh,00h  
+        DB 00h,0Dh,0Dh,0Dh,0Dh,05h,05h,00h  
+        DB 00h,00h,0Dh,0Dh,05h,05h,00h,00h  
         DB 00h,00h,00h,00h,00h,00h,00h,00h  
     wall:
         DB 06h,04h,06h,06h,06h,06h,04h,06h
