@@ -745,8 +745,7 @@
             mov word ptr [si], 0 
             jmp clear_snake
         
-        start:
-        mov snake_length, 0 ; reset score for next game loop
+        start: mov snake_length, 0 ; reset score for next game loop
         game_loop:
             call write_score
             call input
@@ -759,7 +758,7 @@
             int 21h
     main_loop endp
 
-    printsp proc
+    printsp proc    ; print space
         space: 
             mov ah, 02h
             mov dl, 20h
@@ -768,7 +767,7 @@
         ret
     printsp endp
 
-    printnl proc 
+    printnl proc    ; print newline
         nl:
             mov ah, 02h
             mov dl, 10
@@ -1215,15 +1214,15 @@
         cmp difficulty, 2
         je harddelay 
         
-        easydelay: ; 150000 ms (249f0h)
+        easydelay: ; 150000 microsec (249f0h)
             mov cx, 2
             mov dx, 049f0h
             jmp calldelay
-        meddelay:  ; 125000 ms (1e848h)
+        meddelay:  ; 125000 microsec (1e848h)
             mov cx, 1
             mov dx, 0e848h
             jmp calldelay
-        harddelay: ; 100000 ms (186a0h)
+        harddelay: ; 100000 microsec (186a0h)
             mov cx, 1
             mov dx, 86a0h
         calldelay:
@@ -1248,6 +1247,7 @@
             mov ax, @data
             mov ds, ax
             lea si, snake_pos
+
         check_key:
             mov dx, word ptr [si]
             cmp key_pressed, 'w'
@@ -1401,6 +1401,12 @@
                     jne decrlife
                     jmp stop
                     decrlife:
+                        ; reset coords of the snake's tail 
+                        ; (fixes issue wherein old tail is drawn on the coordinate where snake last ate a rotten apple)
+                        mov bx, snake_length
+                        shl bx, 1   ; basically bx *= 2
+                        mov word ptr [si+bx], 0
+
                         dec snake_length                    
                         lea di, rotten_pos
                         mov bp, rotten_seed
@@ -1457,14 +1463,12 @@
         ret
     move endp
 
-;DELAY 125000 (1e848h) ; args: cx dx = time in ms
-delay proc   
-  ;mov cx, 1     ;HIGH WORD.
-  ;mov dx, 0e848h ;LOW WORD.
-  mov ah, 86h    ;WAIT.
-  int 15h
-  ret
-delay endp   
+    ;DELAY args: cx dx = time in micro sec
+    delay proc   
+    mov ah, 86h    ;WAIT.
+    int 15h
+    ret
+    delay endp   
 
     ; bitmaps
     snake_head_up: 
