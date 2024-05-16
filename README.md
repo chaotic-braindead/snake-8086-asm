@@ -3,7 +3,7 @@
 <p>Snake game written in 8086 assembly</p>
 <p align="center">
   <img style="width:500px" src="https://i.imgur.com/w2jaPr3.gif" alt="snek demo">
-  <img style="width:500px" src="https://github.com/chaotic-braindead/snake-8086-asm/blob/main/leaderboard.png?raw=true" alt="leaderboard">
+  <img style="width:500px" src="https://i.imgur.com/XKEFgcs.png" alt="leaderboard">
 </p>
 <ul>
   <h2>NOTES</h2>
