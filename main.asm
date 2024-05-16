@@ -7,8 +7,10 @@
     prev_key db ?
     time_now db 00h
     food_pos dw 0A0Ah
+    food_seed dw 0401h  ; used so that rotten_pos and food_pos are not the same when generating random numbers
     eat_streak db 0
     rotten_pos dw ?
+    rotten_seed dw 1F52h
     temp_pos dw ?
     border_pos dw 28h+28h+18h+18h dup (?)
     paused db 0
@@ -722,9 +724,14 @@
 
     main_loop proc
         lea di, food_pos
+        mov bp, food_seed
         call rng
         lea di, rotten_pos
+        mov bp, rotten_seed
         call rng
+
+        mov eat_streak, 0
+
         lea si, snake_pos
         mov word ptr [si], 0A0Ah ; snake's initial position 
         mov byte ptr key_pressed, 'd'
@@ -1099,13 +1106,14 @@
         ret
     draw endp 
 
-    rng proc       ; args : di = addr of variable
+    rng proc       ; args : di = addr of variable  |  bp = seed
         mov ax, @data
         mov ds, ax
     randstart:
         mov ah, 00h
         int 1ah 
-        
+        xor dx, bp
+
         mov ax, dx 
         xor dx, dx 
         mov cx, 15h ; make sure y coord does not go out of bounds
@@ -1116,7 +1124,8 @@
         
         mov ah, 00h
         int 1ah
-        
+        xor dx, bp 
+
         mov ax, dx 
         xor dx, dx 
         mov cx, 25h ; make sure x coord does not go out of bounds
@@ -1125,7 +1134,7 @@
         inc dl
         mov bh, dl  ; x coord
 
-        mov word ptr [di], bx
+        mov word ptr [di], bx   ; update coordinates of the variable in the given address
 
         lea si, border_pos
         mov bp, 0
@@ -1135,7 +1144,7 @@
             mov ax, word ptr [si]
             mov bx, word ptr [di]
             cmp ax, bx 
-            je randstart    ; generate another coord if food_pos is already occupied by a wall
+            je randstart    ; generate another coord already occupied by a wall
             inc bp 
             add si, 2
             jmp find_border
@@ -1335,6 +1344,43 @@
 
                     inc ah
                     cmp ah, bh 
+                    jng rotten_collision 
+                    dec ah 
+
+                    inc bh
+                    cmp ah, bh
+                    jnl rotten_collision
+
+                    inc al
+                    cmp al, bl 
+                    jng rotten_collision 
+                    dec al
+
+                    inc bl
+                    cmp al, bl
+                    jnl rotten_collision 
+
+                    cmp eat_streak, 5
+                    je superapl
+                    inc snake_length
+                    inc eat_streak
+                    jmp rand
+                    superapl:
+                        add snake_length, 3
+                        mov eat_streak, 0                    
+                    rand: 
+                        lea di, food_pos
+                        mov bp, food_seed
+                        call rng
+
+                rotten_collision:
+                    lea si, snake_pos
+                    lea di, rotten_pos
+                    mov ax, word ptr [si]
+                    mov bx, word ptr [di]
+
+                    inc ah
+                    cmp ah, bh 
                     jng wall_collision 
                     dec ah 
 
@@ -1351,17 +1397,15 @@
                     cmp al, bl
                     jnl wall_collision 
 
-                    cmp eat_streak, 5
-                    je superapl
-                    inc snake_length
-                    inc eat_streak
-                    jmp rand
-                    superapl:
-                        add snake_length, 3
-                        mov eat_streak, 0
+                    cmp snake_length, 0
+                    jne decrlife
+                    jmp stop
+                    decrlife:
+                        dec snake_length                    
+                        lea di, rotten_pos
+                        mov bp, rotten_seed
+                        call rng 
                     
-                    lea di, food_pos
-                    rand: call rng 
             wall_collision:
                 mov ax, @data
                 mov ds, ax 
