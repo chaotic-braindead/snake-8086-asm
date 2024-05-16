@@ -20,8 +20,11 @@
     med_pos dw 12,0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h                  
     hard_pos dw 24,0802h,0803h,0804h,0805h,0806h,0807h,2016h,2015h,2014h,2013h,2012h,2011h,0110h,0210h,0310h,0410h,0510h,0610h,260Ah,250Ah,240Ah,230Ah,220Ah,210Ah
 
-    strScore db 'Score:'
-    strScore_s equ $-strScore
+    strScore db 'SCORE:'
+    strScore_l equ $-strScore
+
+    strSnek db "SNEK"
+    strSnek_l equ $-strSnek
 
     ;main menu
     strTitle db "BSCS 2-2, Group 1",13,10
@@ -747,7 +750,7 @@
         
         start: mov snake_length, 0 ; reset score for next game loop
         game_loop:
-            call write_score
+            call upperborder
             call input
             call draw
             call move
@@ -821,15 +824,15 @@
             int 21h
     InvalidMsg endp
 
-    write_score proc
+    upperborder proc
         mov ax, @data
         mov es, ax 
+
         mov ax, 1300h ; interrupt for write string
         mov bx, 000Fh ; set page number and color of string
-   
         mov dh, 0 ; row
         mov dl, 0 ; col
-        mov cx, strScore_s ; size of string
+        mov cx, strScore_l ; size of string
         lea bp, strScore ; string in es:bp 
         int 10h
 
@@ -842,7 +845,7 @@
             push dx
             loop divide
 
-        mov bp, strScore_s
+        mov bp, strScore_l
         print:
             inc bp
             mov ah, 02h         ; place cursor after strScore
@@ -857,13 +860,21 @@
             add al, '0'
             int 10h         ; print ascii
 
-            mov ax, strScore_s
+            mov ax, strScore_l
             mov bx, bp
             sub bx, ax
             cmp bx, 2
-            jle print        
+            jle print   
+
+        mov ax, 1300h ; interrupt for write string
+        mov bx, 000Fh ; set page number and color of string
+        mov dx, 40
+        sub dx, strSnek_l ; col
+        mov cx, strSnek_l ; size of string
+        lea bp, strSnek ; string in es:bp 
+        int 10h
         ret
-    write_score endp 
+    upperborder endp 
 
     input proc
         mov ah, 01h ; get user input
@@ -1214,17 +1225,17 @@
         cmp difficulty, 2
         je harddelay 
         
-        easydelay: ; 150000 microsec (249f0h)
-            mov cx, 2
-            mov dx, 049f0h
-            jmp calldelay
-        meddelay:  ; 125000 microsec (1e848h)
+        easydelay: ; 125000 microsec (1e848h)
             mov cx, 1
             mov dx, 0e848h
             jmp calldelay
-        harddelay: ; 100000 microsec (186a0h)
+        meddelay:  ; 100000 microsec (186a0h)
             mov cx, 1
             mov dx, 86a0h
+            jmp calldelay
+        harddelay: ; 75000 microsec (124f8h)
+            mov cx, 1
+            mov dx, 24f8h
         calldelay:
             call delay
 
