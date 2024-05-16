@@ -1170,6 +1170,21 @@
             pop cx
             loop draw_horizontal_body
         
+        mov dx, 2307h
+        mov cx, 4
+        draw_vertical_body:
+          push cx
+            push dx 
+            call calculate_pos
+            pop dx 
+            inc dh
+            mov bh, 8
+            mov bl, 8
+            lea si, snake_body
+            call draw_img 
+            pop cx
+            loop draw_vertical_body
+
         mov ch, 2
         call mech_get_resp
         ret
