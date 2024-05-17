@@ -36,6 +36,16 @@
       <img style="width:500px" src="https://i.imgur.com/R1Wscyw.png" alt="hard0">
       <img style="width:500px" src="https://i.imgur.com/vl52k5p.png" alt="hard1">
     </li>
+    <li>
+      <h2>Mechanics</h2>
+      <img style="width:500px" src="https://i.imgur.com/ulHmGM2.png" alt="mech1">
+      <img style="width:500px" src="https://i.imgur.com/ao8f54c.png" alt="mech2">
+      <img style="width:500px" src="https://i.imgur.com/OalANPO.png" alt="mech3">
+      <img style="width:500px" src="https://i.imgur.com/Od9Ju0o.png" alt="mech4">
+      <img style="width:500px" src="https://i.imgur.com/VZvvem1.png" alt="mech5">
+      <img style="width:500px" src="https://i.imgur.com/wQBi47z.png" alt="mech6">
+      <img style="width:500px" src="https://i.imgur.com/de2egJ2.png" alt="mech7">
+    </li>
   </ul>
 </p>
 <ul>

@@ -181,10 +181,10 @@
     strMechInstructions6_2 db "BASED ON THE DIFFICULTY",13,10
     strMechInstructions6_2_l equ $ - strMechInstructions6_2
 
-    strMechDiffLabels db "EASY          MEDIUM                HARD",13,10
+    strMechDiffLabels db "EASY     MEDIUM  HARD",13,10
     strMechDiffLabels_l equ $ - strMechDiffLabels
 
-    strMechDiffTimeDelays db "0.15 SEC DELAY   0.125 SEC DELAY     0.1 SEC DELAY",13,10
+    strMechDiffTimeDelays db "0.125 SEC  0.1 SEC 0.075 SEC ",13,10
     strMechDiffTimeDelays_l equ $ - strMechDiffTimeDelays
 
     ;[7]-mechanics     VIEW LEADERBOARDS
@@ -943,6 +943,30 @@
 
     ; writes default texts per mech_page
     mech_print_page_defaults proc
+        ; draws both left and right log borders simultaneously
+        mov cx, 4
+        mov dx, 0   ; coord (top left)
+        log:      
+            push cx 
+            call calculate_pos 
+            lea si, log_border_left
+            mov bh, 30
+            mov bl, 50
+            push dx
+            call draw_img
+            add dh, 24h
+            call calculate_pos
+            lea si, log_border_right
+            mov bh, 30
+            mov bl, 50
+            call draw_img
+            pop dx 
+            add dx, 6
+            pop cx
+            loop log
+        
+        mov ax, @data
+        mov es, ax 
         ; write "MECHANICS" Title 
         mov dh, 2 ;row
         mov dl, 16 ;column
@@ -992,10 +1016,38 @@
         lea bp, strMechNavi1
         call str_out
 
+        ; draw w
+        mov dx, 1308h
+        lea si, w_key
+        call draw_key
+        
+        ; draw a
+        mov dx, 100Bh
+        lea si, a_key
+        call draw_key
+
+        ; draw s
+        mov dx, 130Bh
+        lea si, s_key 
+        call draw_key
+
+        ; draw d 
+        mov dx, 160Bh
+        lea si, d_key
+        call draw_key 
+
         mov ch, 1
         call mech_get_resp
         ret
     mech_page_1 endp
+
+    draw_key proc 
+        call calculate_pos 
+        mov bh, 23
+        mov bl, 23
+        call draw_img 
+        ret
+    draw_key endp
 
     mech_page_2 proc
         mov ax, @data
@@ -1034,6 +1086,76 @@
         mov cx, strMechNavi2_l
         lea bp, strMechNavi2
         call str_out
+
+        ; draw snake (left side) 
+        mov dx, 0c0Ch
+        mov cx, 7
+        call draw_snake_demo
+        
+        mov dx, 0B07h
+        mov cx, 8
+        draw_sample_wall:
+            push cx
+            push dx 
+            call calculate_pos
+            pop dx 
+            inc dl
+            mov bh, 8
+            mov bl, 8
+            lea si, wall
+            call draw_img 
+            pop cx
+            loop draw_sample_wall
+
+        ; draw snake (right side)
+        mov dx, 160Ch
+        mov cx, 8
+        call draw_snake_demo
+
+        mov dx, 1507h
+        mov cx, 8
+        draw_body_wall:
+            push cx
+            push dx 
+            call calculate_pos
+            pop dx 
+            inc dl
+            mov bh, 8
+            mov bl, 8
+            lea si, snake_body
+            call draw_img 
+            pop cx
+            loop draw_body_wall
+        
+        mov dx, 1607h
+        mov cx, 8
+        draw_horizontal_body:
+            push cx
+            push dx 
+            call calculate_pos
+            pop dx 
+            inc dh
+            mov bh, 8
+            mov bl, 8
+            lea si, snake_body
+            call draw_img 
+            pop cx
+            loop draw_horizontal_body
+        
+        mov dx, 1D08h
+        mov cx, 4
+        draw_vertical_body:
+          push cx
+            push dx 
+            call calculate_pos
+            pop dx 
+            inc dl
+            mov bh, 8
+            mov bl, 8
+            lea si, snake_body
+            call draw_img 
+            pop cx
+            loop draw_vertical_body
 
         mov ch, 2
         call mech_get_resp
@@ -1086,10 +1208,56 @@
         lea bp, strMechNavi3
         call str_out
 
+        ; draw fruit
+        mov dx, 0F09h
+        call calculate_pos 
+        lea si, food_map
+        mov bh, 8
+        mov bl, 8
+        call draw_img
+
+        ; draw top snake
+        mov dx, 1009h
+        mov cx, 10
+        call draw_snake_demo 
+
+        ; draw bottom snake
+        mov dx, 0F0Bh
+        mov cx, 11
+        call draw_snake_demo
+
         mov ch, 3
         call mech_get_resp
         ret
     mech_page_3 endp
+
+    draw_snake_demo proc    ; args: dx = snake head pos, cx = snake length 
+        push cx 
+        call calculate_pos 
+        
+        lea si, snake_head_left
+        mov bh, 8
+        mov bl, 8
+        call draw_img 
+        
+        inc dh
+        pop cx 
+        dec cx
+        
+        draw_top_snake_body:
+            call calculate_pos
+            push dx 
+            push cx
+            lea si, snake_body
+            mov bh, 8
+            mov bl, 8
+            call draw_img 
+            pop cx
+            pop dx 
+            inc dh
+            loop draw_top_snake_body
+        ret
+    draw_snake_demo endp
 
     mech_page_4 proc
         mov ax, @data
@@ -1136,6 +1304,24 @@
         mov cx, strMechNavi4_l
         lea bp, strMechNavi4
         call str_out
+
+        ; draw fruit
+        mov dx, 0F09h
+        call calculate_pos 
+        lea si, rotten_apple
+        mov bh, 8
+        mov bl, 8
+        call draw_img
+
+        ; draw top snake
+        mov dx, 1009h
+        mov cx, 10
+        call draw_snake_demo 
+
+        ; draw bottom snake
+        mov dx, 0F0Bh
+        mov cx, 9
+        call draw_snake_demo
 
         mov ch, 4
         call mech_get_resp
@@ -1188,7 +1374,25 @@
         lea bp, strMechNavi5
         call str_out
 
-        mov ch, 5
+        ; draw fruit
+        mov dx, 0F09h
+        call calculate_pos 
+        lea si, super_apple
+        mov bh, 8
+        mov bl, 8
+        call draw_img
+
+        ; draw top snake
+        mov dx, 1009h
+        mov cx, 10
+        call draw_snake_demo 
+
+        ; draw bottom snake
+        mov dx, 0F0Bh
+        mov cx, 13
+        call draw_snake_demo
+
+        mov ch, 5   
         call mech_get_resp
         ret
     mech_page_5 endp
@@ -1230,6 +1434,67 @@
         mov cx, strMechNavi6_l
         lea bp, strMechNavi6
         call str_out
+
+        ; write "EASY MEDIUM HARD"
+        mov dh, 6
+        mov dl, 9
+        mov bl, 0Fh ;color
+        mov cx, strMechDiffLabels_l
+        lea bp, strMechDiffLabels
+        call str_out
+
+        ; write time delays
+        mov dh, 15
+        mov dl, 6
+        mov bl, 03h ;color
+        mov cx, strMechDiffTimeDelays_l
+        lea bp, strMechDiffTimeDelays
+        call str_out
+
+        ; easy
+        mov dx, 090Ah
+        call calculate_pos 
+
+        lea si, easy_map
+        mov bh, 39
+        mov bl, 23
+        call draw_img
+
+        ; med1
+        mov dx, 1208h
+        call calculate_pos        
+
+        lea si, medium_map_1
+        mov bh, 39
+        mov bl, 23
+        call draw_img
+
+        ; med2
+        mov dx, 120Ch
+        call calculate_pos        
+
+        lea si, medium_map_2
+        mov bh, 39
+        mov bl, 23
+        call draw_img
+        
+        ; hard1
+        mov dx, 1A08h
+        call calculate_pos        
+
+        lea si, hard_map_1
+        mov bh, 39
+        mov bl, 23
+        call draw_img
+
+        ; hard2
+        mov dx, 1A0Ch
+        call calculate_pos        
+
+        lea si, hard_map_2
+        mov bh, 39
+        mov bl, 23
+        call draw_img
 
         mov ch, 6
         call mech_get_resp
@@ -2285,6 +2550,32 @@
         DB 00h,0Ah,02h,02h,02h,02h,02h,02h,02h,0Eh,00h,00h,00h,00h,06h,06h,06h,06h,00h,00h,06h,02h,06h,06h,06h,06h,06h,06h,06h,00h ; 49
         DB 00h,0Ah,02h,02h,02h,02h,02h,02h,0Ah,00h,00h,00h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,06h,00h ; 50
     
+    easy_map:
+    	;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh  ; 1
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 2
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 3
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 4
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 5
+    	DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 6 
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 7
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 8
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 9 
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 10
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 11
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 12
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 13
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 14
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 15
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 16
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 17
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 18
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 19
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 20
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 21
+        DB 0Eh,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,00h,0Eh	; 22
+        DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh  ; 23
+
     medium_map_1:
     	;   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  
         DB 0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh,0Eh  ; 1
