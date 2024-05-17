@@ -43,7 +43,7 @@
       <img style="width:500px" src="https://i.imgur.com/OalANPO.png" alt="mech3">
       <img style="width:500px" src="https://i.imgur.com/Od9Ju0o.png" alt="mech4">
       <img style="width:500px" src="https://i.imgur.com/VZvvem1.png" alt="mech5">
-      <img style="width:500px" src="https://i.imgur.com/wQBi47z.png" alt="mech6">
+      <img style="width:500px" src="https://i.imgur.com/ZfE7oG3.png" alt="mech6">
       <img style="width:500px" src="https://i.imgur.com/de2egJ2.png" alt="mech7">
     </li>
   </ul>

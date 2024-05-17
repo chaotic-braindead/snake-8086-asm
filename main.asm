@@ -1446,7 +1446,7 @@
         ; write time delays
         mov dh, 15
         mov dl, 6
-        mov bl, 03h ;color
+        mov bl, 0Bh ;color
         mov cx, strMechDiffTimeDelays_l
         lea bp, strMechDiffTimeDelays
         call str_out
