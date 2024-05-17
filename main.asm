@@ -943,6 +943,10 @@
 
     ; writes default texts per mech_page
     mech_print_page_defaults proc
+        call draw_log_borders
+        
+        mov ax, @data
+        mov es, ax 
         ; write "MECHANICS" Title 
         mov dh, 2 ;row
         mov dl, 16 ;column
@@ -991,8 +995,6 @@
         mov cx, strMechNavi1_l
         lea bp, strMechNavi1
         call str_out
-
-        call draw_log_borders
 
         ; draw w
         mov dx, 1308h
@@ -1100,8 +1102,6 @@
         mov cx, strMechNavi2_l
         lea bp, strMechNavi2
         call str_out
-
-        call draw_log_borders
 
         mov dx, 0C0Ch
         call calculate_pos 
@@ -1252,8 +1252,6 @@
         lea bp, strMechNavi3
         call str_out
 
-        call draw_log_borders 
-
         mov ch, 3
         call mech_get_resp
         ret
@@ -1304,8 +1302,6 @@
         mov cx, strMechNavi4_l
         lea bp, strMechNavi4
         call str_out
-
-        call draw_log_borders 
 
         mov ch, 4
         call mech_get_resp
@@ -1358,8 +1354,6 @@
         lea bp, strMechNavi5
         call str_out
 
-        call draw_log_borders 
-
         mov ch, 5   
         call mech_get_resp
         ret
@@ -1402,8 +1396,6 @@
         mov cx, strMechNavi6_l
         lea bp, strMechNavi6
         call str_out
-
-        call draw_log_borders 
 
         mov ch, 6
         call mech_get_resp
@@ -1495,8 +1487,6 @@
         mov cx, strMechNavi7_l
         lea bp, strMechNavi7
         call str_out
-
-        call draw_log_borders 
 
         mov ch, 7
         call mech_get_resp
