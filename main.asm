@@ -1170,14 +1170,14 @@
             pop cx
             loop draw_horizontal_body
         
-        mov dx, 2307h
+        mov dx, 1D08h
         mov cx, 4
         draw_vertical_body:
           push cx
             push dx 
             call calculate_pos
             pop dx 
-            inc dh
+            inc dl
             mov bh, 8
             mov bl, 8
             lea si, snake_body
