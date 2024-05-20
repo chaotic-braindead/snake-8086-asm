@@ -2237,6 +2237,10 @@
             mov key_pressed, ah
             jmp check_key
         stop:
+            ;200,000 microseconds
+            mov cx, 0fh
+            mov dx, 4240h 
+            call delay 
             call game_over_page
             ret
         collision:
@@ -2274,6 +2278,7 @@
                 cmp al, bl
                 jnl body_collision
                 dec bl 
+               
                 jmp stop
 
             food_collision:
@@ -2339,6 +2344,7 @@
 
                 cmp snake_length, 0
                 jne decrlife
+                call delay 
                 jmp stop
                 decrlife:
                     ; reset coords of the snake's tail 
@@ -2386,7 +2392,6 @@
                     inc bl
                     cmp al, bl
                     jnl check_wall_col
-
                     jmp stop     
     return: 
         ret
