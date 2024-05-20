@@ -251,43 +251,31 @@
     mov ax, 0001h
     lea di, border_pos
 
-    gen_border_top:
+    top_bot_border:
         cmp ah, 28h
-        je bottom_border
+        je vertical_border
         mov word ptr [di], ax 
+        push ax 
+        add al, 30h
+        mov word ptr [di+2], ax
+        pop ax
         inc ah
-        add di, 2
-        jmp gen_border_top
+        add di, 4
+        jmp top_bot_border
     
-    bottom_border:
-        mov ax, 0031h
-    gen_border_bottom:
-        cmp ah, 28h
-        je left_border 
-        mov word ptr [di], ax 
-        inc ah 
-        add di, 2
-        jmp gen_border_bottom
-
-    left_border:
+    vertical_border:
         mov ax, 0002h
-    gen_border_left:
-        cmp al, 18h
-        je right_border
-        mov word ptr [di], ax 
-        inc al 
-        add di, 2
-        jmp gen_border_left
-    
-    right_border:
-        mov ax, 2702h
-    gen_border_right:
+    left_right_border:
         cmp al, 18h
         je main
         mov word ptr [di], ax 
+        push ax 
+        add ah, 27h
+        mov word ptr [di+2], ax 
+        pop ax
         inc al 
-        add di, 2
-        jmp gen_border_right
+        add di, 4
+        jmp left_right_border
     
     main:
         mov ax, 0013h
@@ -894,10 +882,9 @@
             je lead_back
             jmp lead_page
 
-            lead_back proc
-                jmp menu_page
-                ret
-            lead_back endp
+            lead_back:
+                jmp menu_page    
+        ret
 
     menu_bg_draw PROC
         ;draw left_1
