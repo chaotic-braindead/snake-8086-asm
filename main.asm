@@ -293,7 +293,6 @@
 
         call menu_bg_draw
 
-        menu_page_start:
         mov ax, @data
         mov es, ax
 
@@ -339,6 +338,8 @@
         lea bp, strExit
         call str_out
         ;get resp
+        menu_page_start:
+
         call resp 
         ;if s, start
         cmp al, 's'
@@ -363,7 +364,6 @@
             call cls
             call menu_bg_draw
 
-            diff_page_start:
             mov ax, @data
             mov ds, ax
             mov es, ax
@@ -400,6 +400,7 @@
             lea bp, strBack
             call str_out
 
+            diff_page_start:
             ;get resp
             call resp
             cmp al, '1'
@@ -873,10 +874,11 @@ lead_page:
         lea bp, strBack
         call str_out
 
+        wait_resp:
         call resp
         cmp al, 'b'
             je lead_back
-            jmp lead_page
+            jmp wait_resp
 
             lead_back:
                 jmp menu_page    
