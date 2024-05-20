@@ -246,6 +246,8 @@
     screbuf db 00h
   
 .code
+    mov ax, 0013h
+    int 10h
     mov ax, @data
     mov ds, ax 
     mov ax, 0001h
@@ -267,7 +269,7 @@
         mov ax, 0002h
     left_right_border:
         cmp al, 18h
-        je main
+        je menu_page
         mov word ptr [di], ax 
         push ax 
         add ah, 27h
@@ -276,13 +278,7 @@
         inc al 
         add di, 4
         jmp left_right_border
-    
-    main:
-        mov ax, 0013h
-        int 10h
-        mov ah, 0Bh
-        mov bx, 0000h
-        int 10h
+          
     menu_page:
         call cls
 
@@ -427,370 +423,370 @@
                 je df_menu
                 jmp diff_page_start
                 df_menu: jmp menu_page
-            
-        load_walls proc
-            ;get random bit (0 or 1) using systime for map choice
-            mov ax, @data
-            mov ds, ax
-            mov ah, 00h
-            int 1ah
-            mov ax, dx
-            xor dx, dx
-            mov cx, 10
-            div cx
-            xor dx, 01h ;get the least significant bit
-            ;0 or 1 is now stored in dl
-            cmp difficulty, 1
-            jnz load_hard
-                cmp dl, 1
-                jnz medzero
-                    lea si, med_pos1
-                    jmp load_active
-                medzero:
-                    lea si, med_pos0
-                    jmp load_active
-            load_hard:
-                cmp dl, 1
-                jnz hardzero
-                    lea si, hard_pos1
-                    jmp load_active
-                hardzero:
-                    lea si, hard_pos0
-                    jmp load_active
-            load_active:
-                lea di, active_wall_pos
-                mov cx, word ptr [si]
-                mov word ptr [di], cx
+        
+    load_walls proc
+        ;get random bit (0 or 1) using systime for map choice
+        mov ax, @data
+        mov ds, ax
+        mov ah, 00h
+        int 1ah
+        mov ax, dx
+        xor dx, dx
+        mov cx, 10
+        div cx
+        xor dx, 01h ;get the least significant bit
+        ;0 or 1 is now stored in dl
+        cmp difficulty, 1
+        jnz load_hard
+            cmp dl, 1
+            jnz medzero
+                lea si, med_pos1
+                jmp load_active
+            medzero:
+                lea si, med_pos0
+                jmp load_active
+        load_hard:
+            cmp dl, 1
+            jnz hardzero
+                lea si, hard_pos1
+                jmp load_active
+            hardzero:
+                lea si, hard_pos0
+                jmp load_active
+        load_active:
+            lea di, active_wall_pos
+            mov cx, word ptr [si]
+            mov word ptr [di], cx
+            add si, 2
+            add di, 2
+            ldwall:
+                mov dx, word ptr [si]
+                mov word ptr [di], dx
                 add si, 2
                 add di, 2
-                ldwall:
-                    mov dx, word ptr [si]
-                    mov word ptr [di], dx
-                    add si, 2
-                    add di, 2
-                    loop ldwall
-            ret
-        load_walls endp
+                loop ldwall
+        ret
+    load_walls endp
 
-        game_over_page proc
-            mov ax, @data
-            mov es, ax
-            call cls
-
-            ;write game over prompt
-            mov dh, 7 ;row
-            mov dl, 14 ;column
-            mov bl, 0Ch ;color
-            mov cx, strGameOver_l
-            lea bp, strGameOver
-            call str_out
-
-            ;write score prompt
-            mov dh, 8
-            mov dl, 14
-            mov bl, 0Ah
-            mov cx, strScore_GO_l
-            lea bp, strScore_GO
-            call str_out
-                ;write score int
-                mov ax, snake_length
-                mov cx, 03h
-                divide_score:         ; convert to decimal
-                    xor dx, dx
-                    mov bx, 0ah
-                    div bx
-                    push dx
-                    loop divide_score
-
-                mov bp, strScore_GO_l
-
-                print_score:
-                    mov dh, 8
-                    mov dl, 14
-                    inc bp
-                    mov ah, 02h         ; place cursor after strScore
-                    add dx, bp
-                    int 10h
-
-                    pop dx
-                    mov ah, 09h
-                    mov bx, 000Ah
-                    mov cx, 1
-                    mov al, dl
-                    add al, '0'
-                    int 10h         ; print ascii
-
-                    mov ax, strScore_GO_l
-                    mov bx, bp
-                    sub bx, ax
-                    cmp bx, 2
-                    jle print_score     
-
-            ;write diff choices
-            mov dh, 10
-            mov dl, 14
-            mov bl, 0Eh ; yellow
-                ;easy
-            mov cx, strRetry_l
-            lea bp, strRetry
-            call str_out
-                ;mod
-            mov dh, 12
-            mov cx, strMenu_l
-            lea bp, strMenu
-            call str_out
-
-            mov dh, 14
-            mov cx, strSave_l
-            lea bp, strSave
-            call str_out
-
-
-            call resp
-            cmp al, 'r'
-                jz retry
-            cmp al, 'm'
-                je go_menu
-            cmp al, 's'
-                je go_save
-
-            cmp al, 27
-                je go_exit
-                call game_over_page
-
-                retry: jmp diff_page
-                go_menu: jmp menu_page
-                go_exit: jmp exit
-            ret
-
-            go_save:
-            call cls
-            call menu_bg_draw
-
-            mov ax, @data
-            mov ds, ax
-            mov es, ax 
-
-            lea bp, strUname
-            mov cx, strUname_l
-            mov bl, 0Fh
-            mov dh, 8
-            mov dl, 12
-            call str_out
-            
-            mov cx, 3
-            mov bp, 0
-            underscore:
-                mov ah, 2
-                mov dh, 10
-                mov dl, 18
-                add dx, bp 
-                inc bp
-                mov bh, 0
-                int 10h
-
-                mov ax, 092dh
-                mov bl, 0eh
-                mov bh, 0
-                push cx
-                mov cx, 1
-                int 10h
-                pop cx
-            loop underscore
-            
-            lea si, uname 
-            mov cx, 3
-            mov bp, 0
-            get_uname:
-                mov ah, 7
-                int 21h
-               
-                mov ah, 2
-                mov dh, 10
-                mov dl, 18
-                add dx, bp 
-                inc bp
-                mov bh, 0
-                int 10h
-
-                cmp al, 8
-                jne printchar
-
-                mov ah, 2
-                dec dx 
-                dec bp
-                dec bp
-                dec si
-                mov bh, 0
-                int 10h
-
-                mov ax, 0a2dh
-                mov bh, 0
-                mov cx, 1
-                int 10h 
-
-                jmp get_uname
-
-                printchar:
-                    mov ah, 0ah
-                    mov bh, 0
-                    mov bl, 0eh
-                    push cx
-                    mov cx, 1
-                    int 10h
-                    pop cx
-                
-                mov byte ptr [si], al
-                inc si
-            cmp bp, 3
-            je confirm_uname
-            jmp get_uname
-            
-            confirm_uname:
-                lea bp, strCont
-                mov cx, strCont_l
-                mov bl, 0Fh
-                mov dh, 14
-                mov dl, 7
-                call str_out
-
-                mov ah, 7
-                int 21h
-                mov byte ptr [si], '$'
-                mov ax, snake_length
-                lea si, iscore 
-                mov byte ptr [si+1], al
-             
-            ;open file  
-            mov ax, 3d02h
-            lea dx, filename
-            int 21h
-            mov handle, ax
-            ;seek to start of file
-            mov ax, 4200h
-            mov bx, handle
-            mov cx, 0
-            mov dx, 0
-            int 21h
-
-            ;read from file
-            mov ah, 3fh
-            mov bx, handle
-            mov cx, 1fh
-            lea dx, scores
-            int 21h
-            
-            ;insert
-            lea di, scores
-            xor ax, ax
-            mov al, byte ptr [di]
-            mov bl, 06h ;go to the last score record
-            mul bl
-            xor ah, ah
-            add di, ax ;move di to the the last byte of the last record
-            add di, 01h
-            insrec:
-                lea si, uname
-                mov cx, 04h
-                inpname:
-                    mov dl, byte ptr [si]
-                    mov byte ptr [di], dl
-                    inc si
-                    inc di
-                    loop inpname
-                lea si, iscore
-                mov dh, byte ptr [si]
-                mov dl, byte ptr [si+1]
-                mov byte ptr [di], dh
-                mov byte ptr [di+1], dl
-            
-            ;increment score size 
-            lea si, scores
-            mov ch, byte ptr [si]
-            inc ch
-            mov byte ptr [si], ch
-            
-            ;SORTING
-            mov dh, ch
-            ;ch = outer loop counter
-            ;dh = inner loop counter
-            outsort:
-                lea si, scores ;reset pointers
-                lea di, scores
-                add si, 06h
-                add di, 06h
-                push cx
-                mov ch, dh
-                insort:
-                    mov di, si
-                    mov al, byte ptr [si]
-                    mov ah, byte ptr [si-1]
-                    mov bl, byte ptr [si+6]
-                    mov bh, byte ptr [si+5]
-                    cmp ax, bx
-                    jge noswap
-                    add di, 01h
-                    sub si, 05h
-                    mov dl, 06h
-                    swapscore:
-                        mov bh, byte ptr [di]
-                        mov bl, byte ptr [si]
-                        mov byte ptr [di], bl
-                        mov byte ptr [si], bh
-                        inc si
-                        inc di
-                        dec dl
-                        jnz swapscore
-                    noswap:
-                    add si, 06h
-                    dec ch 
-                jnz insort
-                pop cx
-                dec dh
-                dec ch
-            jnz outsort
-
-            ;cap score size for storage
-            lea si, scores
-            mov al, byte ptr [si]
-            cmp al, 05h
-            jle undercap
-            mov al, 05h
-            undercap:
-            mov byte ptr[si], al
-                
-            ;seek to start of file
-            mov ax, 4200h
-            mov bx, handle
-            mov cx, 0
-            mov dx, 0
-            int 21h
-            ;write to file
-            mov ah, 40h
-            mov bx, handle
-            lea dx, scores
-            mov cx, 1fh;
-            int 21h
-            ;close file
-            mov ah, 3eh
-            mov bx, handle
-            int 21h
-            jmp menu_page
-        game_over_page endp
-
-    lead_page:
+    game_over_page proc
         mov ax, @data
         mov es, ax
         call cls
 
-        ;write leaderboard prompt
+        ;write game over prompt
         mov dh, 7 ;row
         mov dl, 14 ;column
-        mov bl, 0Ah ;color
-        mov cx, strLeadPage_l
-        lea bp, strLeadPage
+        mov bl, 0Ch ;color
+        mov cx, strGameOver_l
+        lea bp, strGameOver
+        call str_out
+
+        ;write score prompt
+        mov dh, 8
+        mov dl, 14
+        mov bl, 0Ah
+        mov cx, strScore_GO_l
+        lea bp, strScore_GO
+        call str_out
+            ;write score int
+            mov ax, snake_length
+            mov cx, 03h
+            divide_score:         ; convert to decimal
+                xor dx, dx
+                mov bx, 0ah
+                div bx
+                push dx
+                loop divide_score
+
+            mov bp, strScore_GO_l
+
+            print_score:
+                mov dh, 8
+                mov dl, 14
+                inc bp
+                mov ah, 02h         ; place cursor after strScore
+                add dx, bp
+                int 10h
+
+                pop dx
+                mov ah, 09h
+                mov bx, 000Ah
+                mov cx, 1
+                mov al, dl
+                add al, '0'
+                int 10h         ; print ascii
+
+                mov ax, strScore_GO_l
+                mov bx, bp
+                sub bx, ax
+                cmp bx, 2
+                jle print_score     
+
+        ;write diff choices
+        mov dh, 10
+        mov dl, 14
+        mov bl, 0Eh ; yellow
+            ;easy
+        mov cx, strRetry_l
+        lea bp, strRetry
+        call str_out
+            ;mod
+        mov dh, 12
+        mov cx, strMenu_l
+        lea bp, strMenu
+        call str_out
+
+        mov dh, 14
+        mov cx, strSave_l
+        lea bp, strSave
+        call str_out
+
+
+        call resp
+        cmp al, 'r'
+            jz retry
+        cmp al, 'm'
+            je go_menu
+        cmp al, 's'
+            je go_save
+
+        cmp al, 27
+            je go_exit
+            call game_over_page
+
+            retry: jmp diff_page
+            go_menu: jmp menu_page
+            go_exit: jmp exit
+        ret
+
+        go_save:
+        call cls
+        call menu_bg_draw
+
+        mov ax, @data
+        mov ds, ax
+        mov es, ax 
+
+        lea bp, strUname
+        mov cx, strUname_l
+        mov bl, 0Fh
+        mov dh, 8
+        mov dl, 12
         call str_out
         
+        mov cx, 3
+        mov bp, 0
+        underscore:
+            mov ah, 2
+            mov dh, 10
+            mov dl, 18
+            add dx, bp 
+            inc bp
+            mov bh, 0
+            int 10h
+
+            mov ax, 092dh
+            mov bl, 0eh
+            mov bh, 0
+            push cx
+            mov cx, 1
+            int 10h
+            pop cx
+        loop underscore
+        
+        lea si, uname 
+        mov cx, 3
+        mov bp, 0
+        get_uname:
+            mov ah, 7
+            int 21h
+            
+            mov ah, 2
+            mov dh, 10
+            mov dl, 18
+            add dx, bp 
+            inc bp
+            mov bh, 0
+            int 10h
+
+            cmp al, 8
+            jne printchar
+
+            mov ah, 2
+            dec dx 
+            dec bp
+            dec bp
+            dec si
+            mov bh, 0
+            int 10h
+
+            mov ax, 0a2dh
+            mov bh, 0
+            mov cx, 1
+            int 10h 
+
+            jmp get_uname
+
+            printchar:
+                mov ah, 0ah
+                mov bh, 0
+                mov bl, 0eh
+                push cx
+                mov cx, 1
+                int 10h
+                pop cx
+            
+            mov byte ptr [si], al
+            inc si
+        cmp bp, 3
+        je confirm_uname
+        jmp get_uname
+        
+        confirm_uname:
+            lea bp, strCont
+            mov cx, strCont_l
+            mov bl, 0Fh
+            mov dh, 14
+            mov dl, 7
+            call str_out
+
+            mov ah, 7
+            int 21h
+            mov byte ptr [si], '$'
+            mov ax, snake_length
+            lea si, iscore 
+            mov byte ptr [si+1], al
+            
+        ;open file  
+        mov ax, 3d02h
+        lea dx, filename
+        int 21h
+        mov handle, ax
+        ;seek to start of file
+        mov ax, 4200h
+        mov bx, handle
+        mov cx, 0
+        mov dx, 0
+        int 21h
+
+        ;read from file
+        mov ah, 3fh
+        mov bx, handle
+        mov cx, 1fh
+        lea dx, scores
+        int 21h
+        
+        ;insert
+        lea di, scores
+        xor ax, ax
+        mov al, byte ptr [di]
+        mov bl, 06h ;go to the last score record
+        mul bl
+        xor ah, ah
+        add di, ax ;move di to the the last byte of the last record
+        add di, 01h
+        insrec:
+            lea si, uname
+            mov cx, 04h
+            inpname:
+                mov dl, byte ptr [si]
+                mov byte ptr [di], dl
+                inc si
+                inc di
+                loop inpname
+            lea si, iscore
+            mov dh, byte ptr [si]
+            mov dl, byte ptr [si+1]
+            mov byte ptr [di], dh
+            mov byte ptr [di+1], dl
+        
+        ;increment score size 
+        lea si, scores
+        mov ch, byte ptr [si]
+        inc ch
+        mov byte ptr [si], ch
+        
+        ;SORTING
+        mov dh, ch
+        ;ch = outer loop counter
+        ;dh = inner loop counter
+        outsort:
+            lea si, scores ;reset pointers
+            lea di, scores
+            add si, 06h
+            add di, 06h
+            push cx
+            mov ch, dh
+            insort:
+                mov di, si
+                mov al, byte ptr [si]
+                mov ah, byte ptr [si-1]
+                mov bl, byte ptr [si+6]
+                mov bh, byte ptr [si+5]
+                cmp ax, bx
+                jge noswap
+                add di, 01h
+                sub si, 05h
+                mov dl, 06h
+                swapscore:
+                    mov bh, byte ptr [di]
+                    mov bl, byte ptr [si]
+                    mov byte ptr [di], bl
+                    mov byte ptr [si], bh
+                    inc si
+                    inc di
+                    dec dl
+                    jnz swapscore
+                noswap:
+                add si, 06h
+                dec ch 
+            jnz insort
+            pop cx
+            dec dh
+            dec ch
+        jnz outsort
+
+        ;cap score size for storage
+        lea si, scores
+        mov al, byte ptr [si]
+        cmp al, 05h
+        jle undercap
+        mov al, 05h
+        undercap:
+        mov byte ptr[si], al
+            
+        ;seek to start of file
+        mov ax, 4200h
+        mov bx, handle
+        mov cx, 0
+        mov dx, 0
+        int 21h
+        ;write to file
+        mov ah, 40h
+        mov bx, handle
+        lea dx, scores
+        mov cx, 1fh;
+        int 21h
+        ;close file
+        mov ah, 3eh
+        mov bx, handle
+        int 21h
+        jmp menu_page
+    game_over_page endp
+
+lead_page:
+    mov ax, @data
+    mov es, ax
+    call cls
+
+    ;write leaderboard prompt
+    mov dh, 7 ;row
+    mov dl, 14 ;column
+    mov bl, 0Ah ;color
+    mov cx, strLeadPage_l
+    lea bp, strLeadPage
+    call str_out
+    
     mov ax, @data
     mov ds, ax
     mov ax, 3d02h
