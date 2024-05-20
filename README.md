@@ -1,4 +1,4 @@
-![2024-05-20 19-22-20](https://github.com/chaotic-braindead/snake-8086-asm/assets/102578910/427bead1-4840-4af1-af34-1bfe920f9579)<h1>20232 Group 1 Block 2 Sat 7am</h1>
+<h1>20232 Group 1 Block 2 Sat 7am</h1>
 <h3>Leader: Tolentino, Michelle</h3>
 <h3>Members</h3>
 <ul>
