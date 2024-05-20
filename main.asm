@@ -2329,8 +2329,8 @@ lead_page:
 
                 cmp snake_length, 0
                 jne decrlife
-                call delay 
                 jmp stop
+
                 decrlife:
                     ; reset coords of the snake's tail 
                     ; (fixes issue wherein old tail is drawn on the coordinate where snake last ate a rotten apple)
@@ -2384,9 +2384,9 @@ lead_page:
 
     ;DELAY args: cx dx = time in micro sec
     delay proc   
-    mov ah, 86h    ;WAIT.
-    int 15h
-    ret
+        mov ah, 86h    ;WAIT.
+        int 15h
+        ret
     delay endp   
 
     ; bitmaps
