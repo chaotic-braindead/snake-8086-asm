@@ -1,4 +1,4 @@
-<h1>20232 Group 1 Block 2 Sat 7am</h1>
+![2024-05-20 19-22-20](https://github.com/chaotic-braindead/snake-8086-asm/assets/102578910/427bead1-4840-4af1-af34-1bfe920f9579)<h1>20232 Group 1 Block 2 Sat 7am</h1>
 <h3>Leader: Tolentino, Michelle</h3>
 <h3>Members</h3>
 <ul>
@@ -16,7 +16,10 @@
 <h1>Snek</h1>
 <p>Snake game written in 8086 assembly</p>
 <p align="center">
-  <video style="width:500px" src="https://i.imgur.com/gehE8fz.mp4" alt="snek demo"></video>
+
+https://github.com/chaotic-braindead/snake-8086-asm/assets/102578910/f7e5f6cf-57e5-41ef-bdf8-7a1a985408d1
+
+
   <ul align="center">
     <li>
       <h2>Menu</h2>
