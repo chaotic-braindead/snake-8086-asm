@@ -48,7 +48,7 @@
     strMech db "[M] MECHANICS",13,10
     strMech_l equ $ - strMech
 
-    strExit db "[ESC] EXIT",13,0
+    strExit db "[ESC] EXIT"
     strExit_l equ $ - strExit
 
     ;difficulty options
@@ -305,32 +305,32 @@
         call str_out
 
         ;write year
-        mov dh, 20
-        mov dl, 13
-        mov bl, 0Fh
-        mov cx, strYear_l
-        lea bp, strYear
-        call str_out
+       mov dh, 20
+       mov dl, 13
+       mov bl, 0Fh
+       mov cx, strYear_l
+       lea bp, strYear
+       call str_out
 
         ;write menu choices
         mov dh, 10
         mov dl, 13
         mov bl, 0Eh 
-            ;start 
+        ;start 
         mov cx, strStart_l
         lea bp, strStart
         call str_out
-            ;leaderboard
+        ;leaderboard    
         mov dh, 12
         mov cx, strLeaderboard_l
         lea bp, strLeaderboard
         call str_out
-            ;mechanics
+        ;mechanics
         mov dh, 14
         mov cx, strMech_l
         lea bp, strMech
         call str_out
-            ;exit
+        ;exit
         mov dh, 16
         mov dl, 13
         mov bl, 0Eh
