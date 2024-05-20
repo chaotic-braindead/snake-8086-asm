@@ -19,8 +19,16 @@
   <img style="width:500px" src="https://i.imgur.com/9aGwXoz.gif" alt="snek demo">
   <ul align="center">
     <li>
+      <h2>Menu</h2>
+      <img style="width:500px" src="https://i.imgur.com/zR5O0Qo.png" alt="menu">
+    </li>
+    <li>
       <h2>Leaderboard</h2>
       <img style="width:500px" src="https://i.imgur.com/XKEFgcs.png" alt="leaderboard">
+    </li>
+    <li>
+      <h2>Difficulty Selection</h2>
+      <img style="width:500px" src="https://i.imgur.com/ZZ8jddG.png" alt="diff">
     </li>
     <li>
       <h2>Easy</h2>
