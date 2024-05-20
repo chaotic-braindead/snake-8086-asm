@@ -16,7 +16,7 @@
 <h1>Snek</h1>
 <p>Snake game written in 8086 assembly</p>
 <p align="center">
-  <img style="width:500px" src="https://i.imgur.com/9aGwXoz.gif" alt="snek demo">
+  <video style="width:500px" src="https://i.imgur.com/gehE8fz.mp4" alt="snek demo"></video>
   <ul align="center">
     <li>
       <h2>Menu</h2>
