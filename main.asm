@@ -66,6 +66,9 @@
 
     strBack db "[B] BACK",13,10
     strBack_l equ $ - strBack
+
+    strPaused db "Paused"
+    strPaused_l equ $-strPaused
     
     ;leaderboard
     strLeadPage db "LEADERBOARD",13,10
@@ -357,6 +360,7 @@
             mm_mech: jmp mech_page
 
         exit:
+            call cls
             mov ah, 4ch
             int 21h 
 
@@ -1696,9 +1700,19 @@ lead_page:
         game_loop:
             call header
             call input
+            cmp paused, 1
+            jz do_paused
             call draw
             call move
             call cls
+            jmp game_loop
+            do_paused:
+                mov dh, 12
+                mov dl, 16
+                mov bl, 0Eh
+                lea bp, strPaused 
+                mov cx, strPaused_l
+                call str_out
             jmp game_loop
         ; should never reach this
             mov ah, 4ch
@@ -1820,6 +1834,8 @@ lead_page:
         jmp back
 
         update:
+            cmp paused, 1
+            jz back
             mov ah, key_pressed
             mov prev_key, ah
             mov key_pressed, al           
@@ -2125,15 +2141,6 @@ lead_page:
     move proc
         mov ax, @data
         mov ds, ax
-        cmp paused, 1
-        jne time 
-        ret 
-        time:
-        mov ah, 2ch ; get system time
-        int 21h
-        cmp dl, time_now
-        je move     ; keep checking until we have a different time
-        mov time_now, dl
         
         cmp difficulty, 0 
         je easydelay
