@@ -17,7 +17,8 @@
 <p>Snake game written in 8086 assembly</p>
 <p align="center">
 
-https://github.com/chaotic-braindead/snake-8086-asm/assets/102578910/f7e5f6cf-57e5-41ef-bdf8-7a1a985408d1
+
+https://github.com/chaotic-braindead/snake-8086-asm/assets/102578910/e998f690-5ddc-4961-9c24-3d32e4e16908
 
 
   <ul align="center">
