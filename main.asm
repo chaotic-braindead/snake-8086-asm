@@ -477,7 +477,7 @@
         mov ax, @data
         mov es, ax
         call cls
-
+        
         ;write game over prompt
         mov dh, 7 ;row
         mov dl, 14 ;column
@@ -546,6 +546,7 @@
         lea bp, strSave
         call str_out
 
+        call draw_logs 
 
         call resp
         cmp al, 'r'
@@ -785,7 +786,7 @@ lead_page:
     call cls
 
     ;write leaderboard prompt
-    mov dh, 7 ;row
+    mov dh, 6 ;row
     mov dl, 14 ;column
     mov bl, 0Ah ;color
     mov cx, strLeadPage_l
@@ -877,6 +878,8 @@ lead_page:
         mov cx, strBack_l
         lea bp, strBack
         call str_out
+
+        call menu_bg_draw
 
         wait_resp:
         call resp
@@ -988,9 +991,7 @@ lead_page:
         skip1: ret
     navigate_mech_page endp
 
-    ; writes default texts per mech_page
-    mech_print_page_defaults proc
-        ; draws both left and right log borders simultaneously
+    draw_logs proc ; draws both left and right logs simultaneously
         mov cx, 4
         mov dx, 0   ; coord (top left)
         log:      
@@ -1011,6 +1012,12 @@ lead_page:
             add dx, 6
             pop cx
             loop log
+        ret
+    draw_logs endp
+
+    ; writes default texts per mech_page
+    mech_print_page_defaults proc
+        call draw_logs
         
         mov ax, @data
         mov es, ax 
