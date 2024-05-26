@@ -1899,16 +1899,7 @@ lead_page:
             mov bl, 8
             call draw_img
         
-        draw_body:      
-            push ax 
-            push bx 
-            push cx 
-            push dx 
-            push ds
-            push di
-            push si
-            push bp
-            
+        draw_body:                  
             mov ax, @data
             mov ds, ax  
             mov bp, snake_length
@@ -1932,15 +1923,6 @@ lead_page:
                 jmp try
         
         draw_food:
-            pop bp
-            pop si
-            pop di
-            pop ds
-            pop dx 
-            pop cx 
-            pop bx 
-            pop ax 
-
             mov ax, @data
             mov ds, ax
             mov dx, food_pos
