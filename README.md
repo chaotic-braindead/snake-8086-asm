@@ -27,7 +27,7 @@ https://github.com/chaotic-braindead/snake-8086-asm/assets/102578910/f7e5f6cf-57
     </li>
     <li>
       <h2>Leaderboard</h2>
-      <img style="width:500px" src="https://i.imgur.com/XKEFgcs.png" alt="leaderboard">
+      <img style="width:500px" src="https://i.imgur.com/EPGcotb.png" alt="leaderboard">
     </li>
     <li>
       <h2>Difficulty Selection</h2>
@@ -56,6 +56,10 @@ https://github.com/chaotic-braindead/snake-8086-asm/assets/102578910/f7e5f6cf-57
       <img style="width:500px" src="https://i.imgur.com/VZvvem1.png" alt="mech5">
       <img style="width:500px" src="https://i.imgur.com/Su6altu.png" alt="mech6">
       <img style="width:500px" src="https://i.imgur.com/de2egJ2.png" alt="mech7">
+    </li>
+    <li>
+      <h2>Game Over</h2>
+      <img style="width:500px" src="https://i.imgur.com/cjk0lLy.png" alt="gameover">
     </li>
   </ul>
 </p>
