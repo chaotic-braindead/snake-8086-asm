@@ -64,15 +64,26 @@ https://github.com/chaotic-braindead/snake-8086-asm/assets/102578910/2327e71b-0a
     </li>
   </ul>
 </p>
-<ul>
-  <h2>NOTES</h2>
-  <li>DOSBOX only</li>
-  <li>probably very inefficient idk</li>
-  <li>fix flickering screen by setting cpu cycles to max on dosbox options</li>
-  <li>works on both TASM and MASM</li>
-  <li>w, a, s, d to move</li>
-</ul>
-<ul>
-  <h2>TODOs/bugs</h2>
-  <li>flickering graphics on lower cpu cycles which becomes more noticeable as snake gets longer </li>
-</ul>
+<h2>Quickstart Guide</h2>
+
+**A. Requirements** - Ensure that the following are installed before proceeding to the next steps:
+  
+  - [DOSBox 0.74-3](https://www.dosbox.com/download.php?main=1)
+
+**B. Download the executable file** - Snek can be downloaded [here.](https://github.com/chaotic-braindead/snake-8086-asm/releases/)
+
+**C. Setup DOSBox**
+
+  1. Open DOSBox installation directory.
+  2. Open DOSBox Options batch file.
+  3. Under the cpu section, set core=dynamic and cycles=max.
+  4. Save and close the file.
+
+**D. Play**
+  1. In DOSBox, open the directory where the game is located.
+  2. Play the game by typing ```snek```
+
+<h2>Game Controls</h2>
+
+  - W, A, S, D = movement
+  - Esc = pause
