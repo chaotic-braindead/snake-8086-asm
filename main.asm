@@ -701,6 +701,15 @@
         mov ax, 3d02h
         lea dx, filename
         int 21h
+        jnc read_file
+
+        ; create and write to DATA.txt if it does not exist
+        mov ax, 3c00h
+        mov cx, 0
+        lea dx, filename
+        int 21h
+        
+        read_file:
         mov handle, ax
         ;seek to start of file
         mov ax, 4200h
@@ -829,9 +838,26 @@ lead_page:
     
     mov ax, @data
     mov ds, ax
+
     mov ax, 3d02h
     lea dx, filename
     int 21h
+    jnc read
+
+    ; create and write to DATA.txt if it does not exist
+    mov ax, 3c00h
+    mov cx, 0
+    lea dx, filename
+    int 21h 
+
+    mov bx, handle
+    lea dx, scores
+    mov ax, 4000h
+    mov cx, 1
+    int 21h
+    jmp back_to_menu
+
+    read:
     mov handle, ax
     ;seek to start of file
     mov ax, 4200h
@@ -849,6 +875,8 @@ lead_page:
 
     lea si, scores
     mov ch, byte ptr [si]
+    cmp ch, 0
+    je back_to_menu
     ;ch = number of records
     inc si
     iter_scores:
