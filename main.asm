@@ -3,7 +3,7 @@
 .data
     snake_pos dw 960 dup (?) ; higher byte = x coord | lower byte = y coord    ; dosbox screen is 27hx18h adjusted for 8x8 sprites  
     snake_length dw 0
-    key_pressed db 'd'
+    key_pressed db ?
     prev_key db ?
     time_now db 00h
     food_pos dw ?
@@ -548,6 +548,7 @@
 
         call draw_logs 
 
+        game_over_resp:
         call resp
         cmp al, 'r'
             jz retry
@@ -558,12 +559,11 @@
 
         cmp al, 27
             je go_exit
-            call game_over_page
 
-            retry: jmp diff_page
-            go_menu: jmp menu_page
-            go_exit: jmp exit
-        ret
+        jmp game_over_resp    
+        retry: jmp diff_page
+        go_menu: jmp menu_page
+        go_exit: jmp exit
 
         go_save:
         call cls
@@ -1725,8 +1725,8 @@ lead_page:
 
         lea si, snake_pos
         mov word ptr [si], 0A0Ah ; snake's initial position 
-        mov byte ptr key_pressed, 'd'
-        mov byte ptr prev_key, 's'
+        mov byte ptr key_pressed, 'e'
+        mov byte ptr prev_key, 'f'
         mov bp, snake_length 
         clear_snake:
             cmp bp, 0
@@ -1737,15 +1737,15 @@ lead_page:
             jmp clear_snake
         
         start: mov snake_length, 0 ; reset score for next game loop
-               mov started, 1
+               mov started, 0
         game_loop:
-            call cls
             call header
             call input
             cmp paused, 1
             jz do_paused
             call draw
             call move
+            call cls
             jmp game_loop
             do_paused:
                 mov dh, 12
@@ -1864,15 +1864,28 @@ lead_page:
         mov ah, 00h
         int 16h
         
-        cmp al, 27 ; check if escape key
-        jne update ; update key_pressed if not esc
-        cmp paused, 0
-        je pause
-        mov paused, 0
-        jmp back
+        cmp al, 27 ; pause if escape key
+        je do_pause
+
+        ; ensure that only valid keys can be read
+        cmp al, 'w'
+        je update 
+        cmp al, 'a'
+        je update 
+        cmp al, 's'
+        je update
+        cmp al, 'd'
+        je update 
+        jmp back 
+
+        do_pause:
+            cmp paused, 0
+            je pause
+            mov paused, 0   ; unpause
+            jmp back
         pause:
-            mov paused, 1
-        jmp back
+            mov paused, 1   ; pause
+            jmp back 
 
         update:
             cmp paused, 1
@@ -1894,6 +1907,7 @@ lead_page:
         mov ds, ax
         mov bl, key_pressed
         mov bh, prev_key
+        mov dx, snake_length
 
         mov ax, @code
         mov ds, ax
@@ -1916,25 +1930,39 @@ lead_page:
         je head_left
         cmp bh, 'd'
         je head_right 
+
+        jmp head_right  ; default head position on start
     
         head_up: 
-            cmp bh, 's'
+            cmp dx, 0 ; snake can move opposite direction if only head exists
+            je h_up
+            cmp bh, 's' ; if the current key pressed is the opposite direction, draw the previous head sprite 
             je head_down
+            h_up:
             lea si, snake_head_up
             jmp draw_head
         head_down:
+            cmp dx, 0 
+            je h_down
             cmp bh, 'w'
             je head_up 
+            h_down:
             lea si, snake_head_down
             jmp draw_head
         head_left:
+            cmp dx, 0
+            je h_left
             cmp bh, 'd'
             je head_right
+            h_left:
             lea si, snake_head_left
             jmp draw_head
         head_right:
+            cmp dx, 0
+            je h_right
             cmp bh, 'a'
             je head_left
+            h_right:
             lea si, snake_head_right
         draw_head:
             mov bh, 8
@@ -2173,14 +2201,6 @@ lead_page:
         mov ax, @data
         mov ds, ax
         
-        cmp started, 1
-        jnz run 
-        mov cx, 0fh
-        mov dx, 4240h 
-        call delay 
-        mov started, 0
-
-        run:
         cmp difficulty, 0 
         je easydelay
         cmp difficulty, 1
@@ -2230,34 +2250,46 @@ lead_page:
             je move_down 
             cmp key_pressed, 'd'
             je move_right
-            jmp ignore
+            ret
         move_up:
+            cmp snake_length, 0
+            je m_up
             cmp prev_key, 's'       ; if the previous key is the opposite direction, do nothing
             je ignore
+            m_up:
             cmp dl, 2   ; check if at the topmost side of the screen
             jz stop
             dec dl 
             mov word ptr [si], dx
             jmp collision
         move_down: 
+            cmp snake_length, 0
+            je m_down
             cmp prev_key, 'w'
             je ignore
+            m_down:
             cmp dl, 22   ; check if at the bottommost side of the screen
             jz stop
             inc dl 
             mov word ptr [si], dx
             jmp collision 
         move_left: 
+            cmp snake_length, 0
+            je m_left
             cmp prev_key, 'd'
             je ignore
+            m_left:
             cmp dh, 1   ; check if at the leftmost side of the screen
             jz stop
             dec dh 
             mov word ptr [si], dx
             jmp collision 
         move_right: 
+            cmp snake_length, 0
+            je m_right
             cmp prev_key, 'a'
             je ignore
+            m_right:
             cmp dh, 38  ; check if at the rightmost side of the screen
             jz stop
             inc dh
