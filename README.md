@@ -18,7 +18,7 @@
 <p align="center">
 
 
-https://github.com/chaotic-braindead/snake-8086-asm/assets/102578910/e998f690-5ddc-4961-9c24-3d32e4e16908
+https://github.com/chaotic-braindead/snake-8086-asm/assets/102578910/2327e71b-0a6b-46c5-b1b4-c3b276041605
 
 
   <ul align="center">
