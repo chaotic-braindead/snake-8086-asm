@@ -14,7 +14,7 @@
     temp_pos dw ?
     border_pos dw 28h+28h+18h+18h dup (?)
     paused db 0
-
+    started db 0 ; if 1, delay for one second before moving
     difficulty db ?  ; change difficulty here | 0 = easy, 1 = med, 2 = hard
 
     med_pos0 dw 30,0806h,0807h,0811h,0812h,0906h,0907h,0911h,0912h,0a06h,0a07h,0a11h,0a12h,100ah,100eh,130ah,130eh,160ah,160eh,1c06h,1c07h,1c11h,1c12h,1d06h,1d07h,1d11h,1d12h,1e06h,1e07h,1e11h,1e12h
@@ -606,7 +606,41 @@
         get_uname:
             mov ah, 7
             int 21h
+            ;check if backspace
+            cmp al, 8
+            je check_if_first
+            jmp check_if_alpha_num
+
+            check_if_first: ; if no char yet, skip
+                cmp bp, 0
+                je get_uname
+                jmp get_key
+
+            check_if_alpha_num:
+                cmp al, 57  ; 57 is '9' in ascii. 
+                jle check_if_less_48  ; check if char is numeric
+                jmp check_if_less_90
+            check_if_less_48:
+                cmp al, 48   ; 48 is '0' in ascii.
+                jl get_uname ; ignore if not numeric
+                jmp get_key  
+            check_if_less_90:
+                cmp al, 90   ; check if char is a capital letter
+                jle check_if_less_65 
+                jmp check_if_less_122 
+            check_if_less_65:
+                cmp al, 65    ; 65 is 'A' in ascii. 
+                jl get_uname  ; ignore al is less than 'A'
+                jmp get_key
+            check_if_less_122:
+                cmp al, 122     ; check if char is a small letter
+                jle check_if_less_97
+                jmp get_uname   ; 122 is 'z' in ascii. ignore if al is less than 'A'.
+            check_if_less_97:
+                cmp al, 97      ; 97 is 'a' in ascii.
+                jl get_uname    ; ignore if al is less than 'a'
             
+            get_key:
             mov ah, 2
             mov dh, 10
             mov dl, 18
@@ -1687,7 +1721,6 @@ lead_page:
         lea di, rotten_pos
         mov bp, rotten_seed
         call rng
-
         mov eat_streak, 0
 
         lea si, snake_pos
@@ -1704,14 +1737,15 @@ lead_page:
             jmp clear_snake
         
         start: mov snake_length, 0 ; reset score for next game loop
+               mov started, 1
         game_loop:
+            call cls
             call header
             call input
             cmp paused, 1
             jz do_paused
             call draw
             call move
-            call cls
             jmp game_loop
             do_paused:
                 mov dh, 12
@@ -1884,15 +1918,23 @@ lead_page:
         je head_right 
     
         head_up: 
+            cmp bh, 's'
+            je head_down
             lea si, snake_head_up
             jmp draw_head
         head_down:
+            cmp bh, 'w'
+            je head_up 
             lea si, snake_head_down
             jmp draw_head
         head_left:
+            cmp bh, 'd'
+            je head_right
             lea si, snake_head_left
             jmp draw_head
         head_right:
+            cmp bh, 'a'
+            je head_left
             lea si, snake_head_right
         draw_head:
             mov bh, 8
@@ -2131,6 +2173,14 @@ lead_page:
         mov ax, @data
         mov ds, ax
         
+        cmp started, 1
+        jnz run 
+        mov cx, 0fh
+        mov dx, 4240h 
+        call delay 
+        mov started, 0
+
+        run:
         cmp difficulty, 0 
         je easydelay
         cmp difficulty, 1
