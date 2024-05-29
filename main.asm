@@ -2173,6 +2173,11 @@ lead_page:
         inc dl
         mov bh, dl  ; x coord
 
+        cmp bx, food_pos
+        je randstart
+        cmp bx, rotten_pos
+        je randstart
+
         mov word ptr [di], bx   ; update coordinates of the variable in the given address (either rotten_pos or food_pos)
 
         lea si, border_pos
