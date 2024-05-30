@@ -2249,9 +2249,9 @@ lead_page:
             mov cx, 1
             mov dx, 86a0h
             jmp calldelay
-        harddelay: ; 85000 microsec (14c08h)
+        harddelay: ; 75000 microsec (124f8h)
             mov cx, 1
-            mov dx, 4c08h
+            mov dx, 24f8h
         calldelay:
             call delay
 
